@@ -45,17 +45,13 @@ AccessiWay/
 ```bash
 # Cloner le dépôt
 git clone <url-du-repo>
-cd AccessiWay
+cd VERA_assistance
 
 # Installer les dépendances
 npm install
 
-# iOS (Mac uniquement)
-cd ios && pod install && cd ..
-npx react-native run-ios
-
-# Android
-npx react-native run-android
+# Android ('Android Studio Installer')
+npx expo start 
 ```
 
 ---

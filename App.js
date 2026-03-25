@@ -2,13 +2,20 @@
 //  AccessiWay — App.js (Expo Go)
 // ─────────────────────────────────────────────
 
-import React, { useState } from 'react';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import MapScreen        from './src/screens/MapScreen';
-import CommunityScreen  from './src/screens/CommunityScreen';
+import WelcomeScreen from './src/screens/WelcomeScreen';
+import LoginScreen from './src/screens/LoginScreen';
+import SignUpScreen from './src/screens/SignUpScreen';
+import MapScreen from './src/screens/MapScreen.js';
+import CommunityScreen from './src/screens/CommunityScreen.js';
+import ProfileScreen from './src/screens/ProfileScreen.js';
+
+const Stack = createStackNavigator();
 import SOSScreen        from './src/screens/SOSScreen';
-import ProfileScreen    from './src/screens/ProfileScreen';
 import SOSStep1Screen   from './src/screens/SOSStep1Screen';
 import SOSStep2Screen   from './src/screens/SOSStep2Screen';
 import SOSStep3Screen   from './src/screens/SOSStep3Screen';
@@ -26,8 +33,26 @@ export const SCREENS = {
 };
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState(SCREENS.MAP);
+  return (
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="SignUp" component={SignUpScreen} />
+          <Stack.Screen name="Main" component={MainApp} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
+  );
+}
 
+// MainApp component with bottom tabs
+const MainApp = () => {
+  const [currentScreen, setCurrentScreen] = React.useState('map');
+
+  const handleNavigate = (tab) => setCurrentScreen(tab);
+  const handlePressProfile = () => setCurrentScreen('profile');
   // ── SOS récents (liste, vide au départ) ──────
   const [sosRecents, setSosRecents] = useState([]);
 
@@ -79,6 +104,15 @@ export default function App() {
 
   const renderScreen = () => {
     switch (currentScreen) {
+      case 'map':        return <MapScreen {...sharedProps} />;
+      case 'community':  return <CommunityScreen {...sharedProps} />;
+      case 'sos':        return <SOSScreen {...sharedProps} />;
+      case 'profile':    return <ProfileScreen {...sharedProps} />;
+      default:           return <MapScreen {...sharedProps} />;
+    }
+  };
+
+  return renderScreen();
       case SCREENS.MAP:        return <MapScreen        {...sharedProps} />;
       case SCREENS.COMMUNITY:  return <CommunityScreen  {...sharedProps} />;
       case SCREENS.SOS:        return <SOSScreen        {...sharedProps} />;

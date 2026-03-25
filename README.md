@@ -49,6 +49,7 @@ cd VERA_assistance
 
 # Installer les dépendances
 npm install
+npx expo install @react-navigation/stack @react-navigation/native
 
 # Android ('Android Studio Installer')
 npx expo start 

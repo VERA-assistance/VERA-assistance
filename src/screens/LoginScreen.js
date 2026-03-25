@@ -17,9 +17,15 @@ const LoginScreen = ({ navigation }) => {
         placeholderTextColor="#ccc"
         secureTextEntry
       />
-      <TouchableOpacity style={styles.button} onPress={() => { /* Logic de connexion */ }}>
+
+      {/* ── Connexion → écran principal ── */}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('Main')}
+      >
         <Text style={styles.buttonText}>Se connecter</Text>
       </TouchableOpacity>
+
       <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
         <Text style={styles.linkText}>Pas encore de compte ? Inscrivez-vous</Text>
       </TouchableOpacity>

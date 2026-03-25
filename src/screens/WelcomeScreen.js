@@ -6,7 +6,7 @@ const WelcomeScreen = ({ navigation }) => {
   return (
     <ImageBackground source={require('../../assets/background.png')} style={styles.background}>
         <View style={styles.overlay}>
-            <Image source={require('../../assets/logo.png')} style={styles.logo} />
+            {/* <Image source={require('../../assets/logo.png')} style={styles.logo} /> */}
             <Text style={styles.title}>vera</Text>
             <Text style={styles.subtitle}>Real access. Real people. Right now.</Text>
             

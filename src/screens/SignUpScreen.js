@@ -27,7 +27,20 @@ const situations = [
 const SignUpScreen = ({ navigation }) => {
   const [step, setStep] = useState(1);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
-  const [selectedSituation, setSelectedSituation] = useState(null);
+  const [selectedSituations, setSelectedSituations] = useState([]);
+
+  const handleSituationToggle = (situationName) => {
+    setSelectedSituations(prevSituations => {
+      if (prevSituations.includes(situationName)) {
+        return prevSituations.filter(s => s !== situationName);
+      } else if (prevSituations.length < 3) {
+        return [...prevSituations, situationName];
+      }
+      return prevSituations;
+    });
+  };
+
+  const canProceedFromStep2 = selectedSituations.length >= 2 && selectedSituations.length <= 3;
 
   const renderStep1 = () => (
     <View style={styles.stepContainer}>
@@ -50,19 +63,30 @@ const SignUpScreen = ({ navigation }) => {
   const renderStep2 = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.title}>What best describes your situation?</Text>
+      <Text style={styles.subtitle}>Please select 2 to 3 disabilities</Text>
       <View style={styles.situationContainer}>
         {situations.map(sit => (
           <TouchableOpacity
             key={sit.name}
-            style={[styles.situationBox, selectedSituation === sit.name && styles.selectedSituationBox]}
-            onPress={() => setSelectedSituation(sit.name)}
+            style={[styles.situationBox, selectedSituations.includes(sit.name) && styles.selectedSituationBox]}
+            onPress={() => handleSituationToggle(sit.name)}
           >
-            <Ionicons name={sit.icon} size={40} color={selectedSituation === sit.name ? '#fff' : '#000'} />
-            <Text style={[styles.situationText, selectedSituation === sit.name && {color: '#fff'}]}>{sit.name}</Text>
+            <Ionicons name={sit.icon} size={40} color={selectedSituations.includes(sit.name) ? '#fff' : '#000'} />
+            <Text style={[styles.situationText, selectedSituations.includes(sit.name) && {color: '#fff'}]}>{sit.name}</Text>
           </TouchableOpacity>
         ))}
       </View>
-      <TouchableOpacity style={styles.button} onPress={() => setStep(3)}>
+      <Text style={styles.selectionCounter}>
+        {selectedSituations.length}/3 selected
+      </Text>
+      {selectedSituations.length < 2 && (
+        <Text style={styles.errorText}>Please select at least 2 disabilities</Text>
+      )}
+      <TouchableOpacity 
+        style={[styles.button, !canProceedFromStep2 && styles.disabledButton]} 
+        onPress={() => setStep(3)}
+        disabled={!canProceedFromStep2}
+      >
         <Text style={styles.buttonText}>Continue</Text>
       </TouchableOpacity>
     </View>
@@ -94,6 +118,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
   optionButton: {
     width: '100%',
     padding: 15,
@@ -118,6 +148,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
     backgroundColor: '#00C2FF',
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
   },
   buttonText: {
     color: '#fff',
@@ -148,7 +181,19 @@ const styles = StyleSheet.create({
   situationText: {
       marginTop: 10,
       textAlign: 'center',
-  }
+  },
+  selectionCounter: {
+    marginTop: 15,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  errorText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: '#e74c3c',
+    fontWeight: '500',
+  },
 });
 
 export default SignUpScreen;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const languages = [
@@ -28,6 +28,11 @@ const SignUpScreen = ({ navigation }) => {
   const [step, setStep] = useState(1);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [selectedSituations, setSelectedSituations] = useState([]);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
 
   const handleSituationToggle = (situationName) => {
     setSelectedSituations(prevSituations => {
@@ -40,11 +45,12 @@ const SignUpScreen = ({ navigation }) => {
     });
   };
 
-  const canProceedFromStep2 = selectedSituations.length >= 2 && selectedSituations.length <= 3;
+  const canProceedFromStep2 = selectedSituations.length >= 0 && selectedSituations.length <= 3;
+  const canProceedFromStep3 = firstName.trim() !== '' && lastName.trim() !== '' && email.trim() !== '';
 
   const renderStep1 = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.title}>Language & Display Preferences</Text>
+      <Text style={styles.title}>Langue & Préférences</Text>
       {languages.map(lang => (
         <TouchableOpacity
           key={lang.code}
@@ -55,15 +61,21 @@ const SignUpScreen = ({ navigation }) => {
         </TouchableOpacity>
       ))}
       <TouchableOpacity style={styles.button} onPress={() => setStep(2)}>
-        <Text style={styles.buttonText}>Continue</Text>
+        <Text style={styles.buttonText}>Continuer</Text>
       </TouchableOpacity>
     </View>
   );
 
   const renderStep2 = () => (
     <View style={styles.stepContainer}>
-      <Text style={styles.title}>What best describes your situation?</Text>
-      <Text style={styles.subtitle}>Please select 2 to 3 disabilities</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => setStep(1)}>
+          <Ionicons name="arrow-back" size={30} color="#00C2FF" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Votre situation</Text>
+        <View style={{width: 30}} />
+      </View>
+      <Text style={styles.subtitle}>Sélectionnez vos handicaps (optionnel)</Text>
       <View style={styles.situationContainer}>
         {situations.map(sit => (
           <TouchableOpacity
@@ -77,28 +89,88 @@ const SignUpScreen = ({ navigation }) => {
         ))}
       </View>
       <Text style={styles.selectionCounter}>
-        {selectedSituations.length}/3 selected
+        {selectedSituations.length}/3 sélectionnés
       </Text>
-      {selectedSituations.length < 2 && (
-        <Text style={styles.errorText}>Please select at least 2 disabilities</Text>
-      )}
       <TouchableOpacity 
-        style={[styles.button, !canProceedFromStep2 && styles.disabledButton]} 
+        style={[styles.button]} 
         onPress={() => setStep(3)}
         disabled={!canProceedFromStep2}
       >
-        <Text style={styles.buttonText}>Continue</Text>
+        <Text style={styles.buttonText}>Continuer</Text>
       </TouchableOpacity>
     </View>
   );
-  
-  // Le rendu de l'étape 3 (Tell us about you) sera ajouté ici
+
+  const renderStep3 = () => (
+    <View style={styles.stepContainer}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => setStep(2)}>
+          <Ionicons name="arrow-back" size={30} color="#00C2FF" />
+        </TouchableOpacity>
+        <Text style={styles.title}>À propos de vous</Text>
+        <View style={{width: 30}} />
+      </View>
+      <Text style={styles.subtitle}>Remplissez vos informations personnelles</Text>
+      
+      <TextInput
+        style={styles.input}
+        placeholder="Prénom"
+        value={firstName}
+        onChangeText={setFirstName}
+        placeholderTextColor="#999"
+      />
+      
+      <TextInput
+        style={styles.input}
+        placeholder="Nom"
+        value={lastName}
+        onChangeText={setLastName}
+        placeholderTextColor="#999"
+      />
+      
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        placeholderTextColor="#999"
+      />
+      
+      <TextInput
+        style={styles.input}
+        placeholder="Téléphone (optionnel)"
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+        placeholderTextColor="#999"
+      />
+      
+      <TextInput
+        style={[styles.input, styles.addressInput]}
+        placeholder="Adresse (optionnel)"
+        value={address}
+        onChangeText={setAddress}
+        multiline
+        numberOfLines={3}
+        placeholderTextColor="#999"
+      />
+      
+      <TouchableOpacity 
+        style={[styles.button, !canProceedFromStep3 && styles.disabledButton]} 
+        onPress={() => navigation.navigate('Welcome')}
+        disabled={!canProceedFromStep3}
+      >
+        <Text style={styles.buttonText}>Terminer l'inscription</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <ScrollView style={styles.container}>
       {step === 1 && renderStep1()}
       {step === 2 && renderStep2()}
-      {/* {step === 3 && renderStep3()} */}
+      {step === 3 && renderStep3()}
     </ScrollView>
   );
 };
@@ -110,13 +182,18 @@ const styles = StyleSheet.create({
   },
   stepContainer: {
     padding: 20,
+  },
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
     textAlign: 'center',
+    flex: 1,
   },
   subtitle: {
     fontSize: 16,
@@ -193,6 +270,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#e74c3c',
     fontWeight: '500',
+  },
+  input: {
+    width: '100%',
+    height: 50,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    fontSize: 16,
+    color: '#333',
+  },
+  addressInput: {
+    height: 100,
+    textAlignVertical: 'top',
+    paddingTop: 12,
   },
 });
 

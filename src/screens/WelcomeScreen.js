@@ -7,7 +7,9 @@ const WelcomeScreen = ({ navigation }) => {
     <ImageBackground source={require('../../assets/background.png')} style={styles.background}>
         <View style={styles.overlay}>
             {/* <Image source={require('../../assets/logo.png')} style={styles.logo} /> */}
-            <Text style={styles.title}>vera</Text>
+            <View style={styles.logoContainer}>
+              <Image source={require('../../assets/logo.png')} style={styles.logo} />
+            </View>
             <Text style={styles.subtitle}>Real access. Real people. Right now.</Text>
             
             <View style={styles.iconContainer}>
@@ -40,16 +42,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(1, 58, 127, 0.8)', // Bleu foncé avec opacité
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 150,
+    height: 150,
     resizeMode: 'contain',
-    marginBottom: 10,
+    marginBottom: 0,
+  },
+  logoContainer: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 15,
+    marginBottom: 30,
   },
   title: {
     fontSize: 60,
     fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 10,
+    color: '#013A7F',
+    marginBottom: 0,
   },
   subtitle: {
     fontSize: 18,

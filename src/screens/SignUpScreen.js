@@ -63,6 +63,9 @@ const SignUpScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.button} onPress={() => setStep(2)}>
         <Text style={styles.buttonText}>Continuer</Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <Text style={styles.linkText}>Vous avez déjà un compte ?</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -158,7 +161,7 @@ const SignUpScreen = ({ navigation }) => {
       
       <TouchableOpacity 
         style={[styles.button, !canProceedFromStep3 && styles.disabledButton]} 
-        onPress={() => navigation.navigate('Welcome')}
+        onPress={() => navigation.navigate('Map')}
         disabled={!canProceedFromStep3}
       >
         <Text style={styles.buttonText}>Terminer l'inscription</Text>
@@ -287,6 +290,12 @@ const styles = StyleSheet.create({
     height: 100,
     textAlignVertical: 'top',
     paddingTop: 12,
+  },
+  linkText: {
+    color: '#00C2FF',
+    fontSize: 16,
+    marginTop: 15,
+    textDecorationLine: 'underline',
   },
 });
 

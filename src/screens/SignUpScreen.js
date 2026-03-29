@@ -161,7 +161,7 @@ const SignUpScreen = ({ navigation }) => {
       
       <TouchableOpacity 
         style={[styles.button, !canProceedFromStep3 && styles.disabledButton]} 
-        onPress={() => navigation.navigate('Map')}
+        onPress={() => navigation.navigate('Main')}
         disabled={!canProceedFromStep3}
       >
         <Text style={styles.buttonText}>Terminer l'inscription</Text>

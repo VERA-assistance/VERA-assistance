@@ -1,9 +1,6 @@
 // ─────────────────────────────────────────────
 //  AccessiWay — Écran Carte (Map)
-//
-//  Collaborateur responsable : [Nom]
-//  Description : Carte principale de navigation
-//                accessible (type Waze / VERA)
+//  Redesigned to match vera app mockup
 // ─────────────────────────────────────────────
 
 import React, { useState } from 'react';
@@ -16,914 +13,1022 @@ import {
   TextInput,
   Image,
   Modal,
-  SafeAreaView,
+  Dimensions,
+  StatusBar,
 } from 'react-native';
 import ScreenLayout from '../components/ScreenLayout';
 import { Colors, Typography, Spacing } from '../theme/theme';
 
-// ─── Données mockées ──────────────────────────────────────────────────────────
+var SCREEN_W = Dimensions.get('window').width;
 
-const FILTERS = ['Public Transport', 'Restaurants & Venues', 'Nearby'];
+// ─── Brand Colors ─────────────────────────────────────────────────────────────
+var BRAND = {
+  primary: '#1a56db',       // vera blue
+  primaryDark: '#1e3a8a',
+  green: '#16a34a',
+  yellow: '#ca8a04',
+  red: '#dc2626',
+  chipTransport: '#22c55e',
+  chipRestaurant: '#ef4444',
+  chipNearby: '#64748b',
+  textPrimary: '#0f172a',
+  textSecondary: '#64748b',
+  border: '#e2e8f0',
+  bg: '#f8fafc',
+};
 
-const CATEGORIES = ['Nearby', 'Restaurants', 'Lieux', 'Visites'];
+// ─── Data ─────────────────────────────────────────────────────────────────────
 
-const TRANSPORT_STOP = {
-  name: 'Debourg – Metro Ligne B',
+var FILTERS = [
+  { key: 'transport',   label: 'Public Transport',     icon: '🚌', color: BRAND.chipTransport },
+  { key: 'restaurants', label: 'Restaurants & Venues', icon: '🍽️', color: BRAND.chipRestaurant },
+  { key: 'nearby',      label: 'Nearby',               icon: '📍', color: BRAND.chipNearby },
+];
+
+var CATEGORIES = ['Nearby', 'Restaurants', 'Venues', 'Sightseeing'];
+
+var TRANSPORT_STOP = {
+  name: 'Debourg – Metro Line B',
   score: 70,
-  scoreLabel: 'Bonne fiabilité',
-  scoreColor: '#ca8a04',
+  scoreLabel: 'Good Reliability',
+  scoreColor: BRAND.yellow,
   reports: 9,
-  updated: 'il y a 8 min',
+  updated: '8m ago',
   features: [
-    { icon: '🛗', label: 'Ascenseur',        status: 'EN SERVICE',    statusColor: '#16a34a', statusIcon: '✅' },
-    { icon: '↗️', label: 'Escalateur',       status: 'HORS SERVICE',  statusColor: '#dc2626', statusIcon: '❌' },
-    { icon: '⚠️', label: 'Accès de plain-pied', status: 'LIMITÉ',     statusColor: '#ca8a04', statusIcon: '⚠️' },
+    { icon: '🛗', label: 'Elevator',      status: 'WORKING',      statusColor: BRAND.green,  statusIcon: '✓' },
+    { icon: '↗️', label: 'Escalator',     status: 'OUT OF SERVICE', statusColor: BRAND.red,  statusIcon: '✕' },
+    { icon: '⚠️', label: 'Step-free exit', status: 'LIMITED',     statusColor: BRAND.yellow, statusIcon: '⚠' },
   ],
 };
 
-const PLACES = [
+var PLACES = [
   {
-    id: 1,
-    name: 'Le Saint Laurent',
-    type: 'Pizzeria',
-    stars: 3.5,
-    score: 91,
-    scoreColor: '#16a34a',
-    category: 'Restaurants',
+    id: 1, name: 'Le Saint Laurent', type: 'Pizza Restaurant',
+    stars: 3.5, score: 91, scoreColor: BRAND.green, category: 'Restaurants',
     img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=80&h=80&fit=crop',
     features: [
-      { label: 'Rampe',              status: 'ok' },
-      { label: 'Toilettes accessibles', status: 'ok' },
+      { label: 'Ramp', status: 'ok' },
+      { label: 'Accessible Toilets', status: 'ok' },
     ],
+    px: 0.18, py: 0.44,
   },
   {
-    id: 2,
-    name: 'Sipres',
-    type: 'Cuisine française · 1 étoile Michelin',
-    stars: 3,
-    score: 100,
-    scoreColor: '#16a34a',
-    category: 'Restaurants',
+    id: 2, name: 'Sipres', type: 'French Cuisine · 1 Michelin Star',
+    stars: 3, score: 100, scoreColor: BRAND.green, category: 'Restaurants',
     img: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=80&h=80&fit=crop',
     features: [
-      { label: 'Rampe',              status: 'ok' },
-      { label: 'Toilettes accessibles', status: 'ok' },
+      { label: 'Ramp', status: 'ok' },
+      { label: 'Accessible Toilets', status: 'ok' },
     ],
+    px: 0.50, py: 0.28,
   },
   {
-    id: 3,
-    name: 'Tram 33',
-    type: 'Bar à cocktails',
-    stars: 1.5,
-    score: 58,
-    scoreColor: '#dc2626',
-    category: 'Restaurants',
+    id: 3, name: 'Tram 33', type: 'Cocktail Bar',
+    stars: 1.5, score: 58, scoreColor: BRAND.red, category: 'Restaurants',
     img: 'https://images.unsplash.com/photo-1536935338788-846bb9981813?w=80&h=80&fit=crop',
     features: [
-      { label: 'Rampe',                  status: 'ok' },
-      { label: 'Toilettes au 2ème étage', status: 'warning' },
+      { label: 'Ramp', status: 'ok' },
+      { label: 'Toilet on 2nd floor', status: 'warning' },
     ],
+    px: 0.72, py: 0.55,
   },
   {
-    id: 4,
-    name: "La Table d'Ambre",
-    type: 'Cuisine française',
-    stars: 4,
-    score: 77,
-    scoreColor: '#ca8a04',
-    category: 'Restaurants',
+    id: 4, name: "La Table d'Ambre", type: 'French Cuisine',
+    stars: 4, score: 77, scoreColor: BRAND.yellow, category: 'Restaurants',
     img: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=80&h=80&fit=crop',
     features: [
-      { label: 'Rampe',              status: 'error' },
-      { label: 'Toilettes accessibles', status: 'ok' },
+      { label: 'Ramp', status: 'error' },
+      { label: 'Accessible Toilets', status: 'ok' },
     ],
+    px: 0.82, py: 0.38,
   },
   {
-    id: 5,
-    name: 'Anahera',
-    type: 'Coffee Shop',
-    stars: 5,
-    score: 64,
-    scoreColor: '#ca8a04',
-    category: 'Restaurants',
+    id: 5, name: 'Anahera', type: 'Coffee Shop',
+    stars: 5, score: 64, scoreColor: BRAND.yellow, category: 'Restaurants',
     img: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=80&h=80&fit=crop',
     features: [
-      { label: 'Rampe',              status: 'ok' },
-      { label: '3 marches vers WC', status: 'warning' },
+      { label: 'Ramp', status: 'ok' },
+      { label: '3 steps to enter toilet', status: 'warning' },
     ],
+    px: 0.35, py: 0.65,
   },
   {
-    id: 6,
-    name: 'Musée des Confluences',
-    type: 'Musée',
-    stars: 4.5,
-    score: 88,
-    scoreColor: '#16a34a',
-    category: 'Visites',
+    id: 6, name: 'Musée des Confluences', type: 'Museum',
+    stars: 4.5, score: 88, scoreColor: BRAND.green, category: 'Sightseeing',
     img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=80&h=80&fit=crop',
     features: [
-      { label: 'Rampe',              status: 'ok' },
-      { label: 'Toilettes accessibles', status: 'ok' },
+      { label: 'Ramp', status: 'ok' },
+      { label: 'Accessible Toilets', status: 'ok' },
     ],
+    px: 0.60, py: 0.72,
   },
   {
-    id: 7,
-    name: 'Opéra de Lyon',
-    type: 'Opéra',
-    stars: 4,
-    score: 72,
-    scoreColor: '#ca8a04',
-    category: 'Lieux',
+    id: 7, name: 'Opéra de Lyon', type: 'Opera House',
+    stars: 4, score: 72, scoreColor: BRAND.yellow, category: 'Venues',
     img: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=80&h=80&fit=crop',
     features: [
-      { label: 'Rampe',                      status: 'ok' },
-      { label: 'Places fauteuil limitées',   status: 'warning' },
+      { label: 'Ramp', status: 'ok' },
+      { label: 'Limited wheelchair spaces', status: 'warning' },
     ],
+    px: 0.25, py: 0.20,
   },
   {
-    id: 8,
-    name: "Parc de la Tête d'Or",
-    type: 'Parc',
-    stars: 4.5,
-    score: 95,
-    scoreColor: '#16a34a',
-    category: 'Nearby',
+    id: 8, name: "Parc de la Tête d'Or", type: 'Park',
+    stars: 4.5, score: 95, scoreColor: BRAND.green, category: 'Nearby',
     img: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=80&h=80&fit=crop',
     features: [
-      { label: 'Allées accessibles',    status: 'ok' },
-      { label: 'Toilettes accessibles', status: 'ok' },
+      { label: 'Accessible paths', status: 'ok' },
+      { label: 'Accessible Toilets', status: 'ok' },
     ],
+    px: 0.88, py: 0.20,
   },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Vera Logo ────────────────────────────────────────────────────────────────
 
-function getFeatureColor(status) {
-  if (status === 'ok')      return '#16a34a';
-  if (status === 'warning') return '#ca8a04';
-  return '#dc2626';
-}
-
-function getFeatureIcon(status) {
-  if (status === 'ok')      return '✓';
-  if (status === 'warning') return '⚠';
-  return '✗';
-}
-
-function renderStars(count) {
-  return Array.from({ length: 5 }, (_, i) => {
-    const full = i < Math.floor(count);
-    const half = !full && i < count;
-    return React.createElement(
+function VeraLogo({ size = 28 }) {
+  return React.createElement(
+    View,
+    { style: { flexDirection: 'row', alignItems: 'center', gap: 4 } },
+    React.createElement(
+      View,
+      {
+        style: {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: BRAND.primary,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+      },
+      React.createElement(
+        Text,
+        { style: { color: '#fff', fontSize: size * 0.55, fontWeight: '900' } },
+        '✓'
+      )
+    ),
+    React.createElement(
       Text,
-      { key: i, style: { color: '#f59e0b', opacity: full ? 1 : half ? 0.6 : 0.2, fontSize: 11 } },
-      '★'
-    );
-  });
+      { style: { fontSize: size * 0.75, fontWeight: '800', color: BRAND.primary, letterSpacing: -0.5 } },
+      'vera'
+    )
+  );
 }
 
-// ─── Composant : carte simulée ────────────────────────────────────────────────
+// ─── Map View ────────────────────────────────────────────────────────────────
 
-function MockMap() {
-  const pins = [
-    { left: '8%',  top: '38%', score: 81,  color: '#16a34a' },
-    { left: '38%', top: '22%', score: 70,  color: '#ca8a04' },
-    { left: '65%', top: '18%', score: 94,  color: '#16a34a' },
-    { left: '25%', top: '55%', score: 88,  color: '#16a34a' },
-    { left: '55%', top: '50%', score: 58,  color: '#dc2626' },
-    { left: '75%', top: '44%', score: 77,  color: '#ca8a04' },
-    { left: '48%', top: '32%', score: 100, color: '#16a34a' },
-  ];
+function MapView({ activeFilter }) {
+  var MAP_H = 220;
+  var W = SCREEN_W;
 
   return React.createElement(
     View,
-    { style: styles.mapContainer },
+    { style: { width: W, height: MAP_H, overflow: 'hidden' } },
 
-    // Fond dégradé simulant une carte
-    React.createElement(View, { style: styles.mapBg }),
+    // Sky-blue base
+    React.createElement(View, { style: { position: 'absolute', inset: 0, backgroundColor: '#e8f4f8' } }),
 
-    // Rivière
-    React.createElement(View, { style: styles.mapRiver }),
+    // River (Seine-like diagonal band)
+    React.createElement(View, {
+      style: {
+        position: 'absolute',
+        top: MAP_H * 0.30,
+        left: -20,
+        width: W + 40,
+        height: 28,
+        backgroundColor: '#93c5fd',
+        opacity: 0.85,
+        transform: [{ rotate: '-6deg' }],
+      },
+    }),
 
-    // Blocs de quartiers
-    React.createElement(View, { style: [styles.mapBlock, { top: '8%',  left: '4%',  width: '24%', height: '24%' }] }),
-    React.createElement(View, { style: [styles.mapBlock, { top: '8%',  left: '36%', width: '18%', height: '18%', backgroundColor: '#fefce8' }] }),
-    React.createElement(View, { style: [styles.mapBlock, { top: '60%', left: '38%', width: '26%', height: '22%', backgroundColor: '#eff6ff' }] }),
+    // Neighborhoods
+    React.createElement(View, { style: { position: 'absolute', top: 8, left: 8, width: W * 0.26, height: MAP_H * 0.32, backgroundColor: '#dcfce7', borderRadius: 6, opacity: 0.75 } }),
+    React.createElement(View, { style: { position: 'absolute', top: 8, left: W * 0.36, width: W * 0.24, height: MAP_H * 0.25, backgroundColor: '#fef9c3', borderRadius: 6, opacity: 0.75 } }),
+    React.createElement(View, { style: { position: 'absolute', top: MAP_H * 0.52, left: W * 0.28, width: W * 0.32, height: MAP_H * 0.38, backgroundColor: '#eff6ff', borderRadius: 6, opacity: 0.7 } }),
+    React.createElement(View, { style: { position: 'absolute', top: MAP_H * 0.38, left: W * 0.64, width: W * 0.32, height: MAP_H * 0.42, backgroundColor: '#f0fdf4', borderRadius: 6, opacity: 0.65 } }),
 
-    // Lignes de rues
-    React.createElement(View, { style: styles.mapStreetH1 }),
-    React.createElement(View, { style: styles.mapStreetH2 }),
-    React.createElement(View, { style: styles.mapStreetV1 }),
-    React.createElement(View, { style: styles.mapStreetV2 }),
+    // Road grid
+    ...[0.30, 0.58, 0.15, 0.75].map((t, i) =>
+      React.createElement(View, {
+        key: 'hr' + i,
+        style: { position: 'absolute', top: MAP_H * t, left: 0, right: 0, height: i < 2 ? 5 : 3, backgroundColor: '#fff', opacity: i < 2 ? 0.9 : 0.6 },
+      })
+    ),
+    ...[0.30, 0.62, 0.11, 0.84].map((l, i) =>
+      React.createElement(View, {
+        key: 'vr' + i,
+        style: { position: 'absolute', top: 0, bottom: 0, left: W * l, width: i < 2 ? 4 : 3, backgroundColor: '#fff', opacity: i < 2 ? 0.9 : 0.6 },
+      })
+    ),
 
-    // Pins de score
-    ...pins.map((p, i) =>
+    // Metro line
+    React.createElement(View, {
+      style: {
+        position: 'absolute', top: MAP_H * 0.70, left: W * 0.04, width: W * 0.42,
+        height: 3, backgroundColor: BRAND.primary, opacity: 0.8,
+        transform: [{ rotate: '-16deg' }],
+      },
+    }),
+    React.createElement(View, {
+      style: {
+        position: 'absolute', top: MAP_H * 0.40, left: W * 0.36, width: W * 0.52,
+        height: 3, backgroundColor: BRAND.primary, opacity: 0.8,
+        transform: [{ rotate: '-16deg' }],
+      },
+    }),
+
+    // Metro station badge
+    React.createElement(
+      TouchableOpacity,
+      {
+        style: {
+          position: 'absolute',
+          top: MAP_H * 0.45,
+          left: W * 0.39,
+          width: 30,
+          height: 30,
+          borderRadius: 8,
+          backgroundColor: '#dc2626',
+          borderWidth: 2.5,
+          borderColor: '#fff',
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.3,
+          shadowRadius: 4,
+          elevation: 5,
+        },
+      },
+      React.createElement(Text, { style: { color: '#fff', fontWeight: '900', fontSize: 13 } }, 'M')
+    ),
+
+    // Score pins
+    PLACES.map((p) =>
       React.createElement(
         View,
-        { key: i, style: [styles.mapPin, { left: p.left, top: p.top, backgroundColor: p.color }] },
-        React.createElement(Text, { style: styles.mapPinText }, p.score)
+        {
+          key: p.id,
+          style: {
+            position: 'absolute',
+            top: MAP_H * p.py - 14,
+            left: W * p.px - 20,
+            backgroundColor: p.scoreColor,
+            paddingHorizontal: 7,
+            paddingVertical: 4,
+            borderRadius: 8,
+            borderWidth: 2,
+            borderColor: '#fff',
+            shadowColor: p.scoreColor,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.35,
+            shadowRadius: 4,
+            elevation: 5,
+          },
+        },
+        React.createElement(Text, { style: { color: '#fff', fontWeight: '900', fontSize: 12 } }, String(p.score))
       )
     ),
 
-    // Station métro
-    React.createElement(
-      View,
-      { style: [styles.mapMetroPin, { left: '36%', top: '42%' }] },
-      React.createElement(Text, { style: styles.mapMetroText }, 'M')
-    ),
-
-    // Position utilisateur
-    React.createElement(View, { style: styles.mapUserDot }),
-    React.createElement(View, { style: styles.mapUserPulse })
-  );
-}
-
-// ─── Composant : score badge ──────────────────────────────────────────────────
-
-function ScoreBadge(props) {
-  return React.createElement(
-    View,
-    { style: [styles.scoreBadge, { backgroundColor: props.color, width: props.size || 40, height: props.size || 40, borderRadius: (props.size || 40) / 2 }] },
-    React.createElement(Text, { style: [styles.scoreBadgeText, { fontSize: props.size > 40 ? 16 : 13 }] }, props.score)
-  );
-}
-
-// ─── Composant : ligne de lieu ────────────────────────────────────────────────
-
-function PlaceRow(props) {
-  return React.createElement(
-    TouchableOpacity,
-    { style: styles.placeRow, onPress: () => props.onPress(props.place), activeOpacity: 0.7 },
-
-    React.createElement(Image, {
-      source: { uri: props.place.img },
-      style: styles.placeImg,
+    // User location dot
+    React.createElement(View, {
+      style: {
+        position: 'absolute',
+        top: MAP_H * 0.48 - 14,
+        left: W * 0.44 - 14,
+        width: 28, height: 28, borderRadius: 14,
+        backgroundColor: 'rgba(37,99,235,0.18)',
+      },
+    }),
+    React.createElement(View, {
+      style: {
+        position: 'absolute',
+        top: MAP_H * 0.48 - 8,
+        left: W * 0.44 - 8,
+        width: 16, height: 16, borderRadius: 8,
+        backgroundColor: BRAND.primary,
+        borderWidth: 2.5,
+        borderColor: '#fff',
+        shadowColor: BRAND.primary,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.5,
+        shadowRadius: 6,
+        elevation: 7,
+      },
     }),
 
+    // Map layer icon (top-right)
+    React.createElement(
+      TouchableOpacity,
+      {
+        style: {
+          position: 'absolute',
+          top: 10, right: 10,
+          width: 34, height: 34,
+          backgroundColor: '#fff',
+          borderRadius: 8,
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
+          elevation: 3,
+        },
+      },
+      React.createElement(Text, { style: { fontSize: 16 } }, '🗺️')
+    )
+  );
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function featureColor(status) {
+  return status === 'ok' ? BRAND.green : status === 'warning' ? BRAND.yellow : BRAND.red;
+}
+
+function Stars({ count }) {
+  return React.createElement(
+    View,
+    { style: { flexDirection: 'row', gap: 1 } },
+    [0, 1, 2, 3, 4].map((i) => {
+      var full = i < Math.floor(count);
+      var half = !full && i < count;
+      return React.createElement(
+        Text,
+        { key: i, style: { color: '#f59e0b', opacity: full ? 1 : half ? 0.55 : 0.2, fontSize: 11 } },
+        '★'
+      );
+    })
+  );
+}
+
+function ScoreBadge({ score, color, size = 40 }) {
+  return React.createElement(
+    View,
+    {
+      style: {
+        width: size, height: size,
+        borderRadius: size / 2,
+        backgroundColor: color,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+        shadowColor: color,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 3,
+      },
+    },
+    React.createElement(
+      Text,
+      { style: { color: '#fff', fontWeight: '900', fontSize: size > 44 ? 17 : 13 } },
+      String(score)
+    )
+  );
+}
+
+// ─── Place Row ────────────────────────────────────────────────────────────────
+
+function PlaceRow({ place, onPress }) {
+  return React.createElement(
+    TouchableOpacity,
+    {
+      style: styles.placeRow,
+      onPress: () => onPress(place),
+      activeOpacity: 0.7,
+    },
+    React.createElement(Image, { source: { uri: place.img }, style: styles.placeImg }),
     React.createElement(
       View,
       { style: styles.placeInfo },
       React.createElement(
         View,
-        { style: styles.placeNameRow },
-        React.createElement(Text, { style: styles.placeName, numberOfLines: 1 }, props.place.name),
-        React.createElement(View, { style: { flexDirection: 'row' } }, renderStars(props.place.stars))
+        { style: { flexDirection: 'row', alignItems: 'center', gap: 5, flexWrap: 'wrap' } },
+        React.createElement(Text, { style: styles.placeName, numberOfLines: 1 }, place.name),
+        React.createElement(Stars, { count: place.stars })
       ),
-      React.createElement(Text, { style: styles.placeType, numberOfLines: 1 }, props.place.type),
+      React.createElement(Text, { style: styles.placeType, numberOfLines: 1 }, place.type),
       React.createElement(
         View,
-        { style: styles.placeFeatures },
-        props.place.features.map((f, i) =>
+        { style: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 } },
+        place.features.map((f, i) =>
           React.createElement(
-            Text,
-            { key: i, style: [styles.placeFeatureText, { color: getFeatureColor(f.status) }] },
-            getFeatureIcon(f.status) + ' ' + f.label
+            View,
+            { key: i, style: { flexDirection: 'row', alignItems: 'center', gap: 3 } },
+            React.createElement(
+              Text,
+              { style: { fontSize: 11, color: featureColor(f.status) } },
+              f.status === 'ok' ? '✓' : f.status === 'warning' ? '⚠' : '✕'
+            ),
+            React.createElement(
+              Text,
+              { style: { fontSize: 11, color: BRAND.textSecondary } },
+              f.label
+            )
           )
         )
       )
     ),
-
-    React.createElement(ScoreBadge, { score: props.place.score, color: props.place.scoreColor, size: 38 })
+    React.createElement(ScoreBadge, { score: place.score, color: place.scoreColor, size: 40 })
   );
 }
 
-// ─── Composant : carte transport ─────────────────────────────────────────────
+// ─── Transport Card ───────────────────────────────────────────────────────────
 
 function TransportCard() {
-  const stop = TRANSPORT_STOP;
+  var s = TRANSPORT_STOP;
   return React.createElement(
     View,
     { style: styles.transportCard },
 
-    // Header score
+    // Header
     React.createElement(
       View,
       { style: styles.transportHeader },
       React.createElement(
         View,
         { style: { flex: 1 } },
-        React.createElement(Text, { style: styles.transportName }, stop.name),
+        React.createElement(Text, { style: styles.transportName }, s.name),
         React.createElement(
           Text,
-          { style: styles.transportReports },
-          stop.reports + ' rapports vérifiés · Mis à jour ' + stop.updated
+          { style: styles.transportMeta },
+          'Based on ' + s.reports + ' verified user reports · Updated ' + s.updated
         )
       ),
       React.createElement(
         View,
         { style: { alignItems: 'flex-end' } },
-        React.createElement(Text, { style: styles.transportScoreLabel }, 'Score fiabilité'),
+        React.createElement(Text, { style: styles.transportScoreLabel }, 'Reliability Score'),
         React.createElement(
           View,
-          { style: { flexDirection: 'row', alignItems: 'center', gap: 4 } },
-          React.createElement(Text, { style: [styles.transportScore, { color: stop.scoreColor }] }, stop.score),
-          React.createElement(Text, { style: [styles.transportScoreSub, { color: stop.scoreColor }] }, '(' + stop.scoreLabel + ')')
+          { style: { flexDirection: 'row', alignItems: 'baseline', gap: 6 } },
+          React.createElement(Text, { style: [styles.transportScoreNum, { color: s.scoreColor }] }, String(s.score)),
+          React.createElement(
+            Text,
+            { style: [styles.transportScoreTag, { color: s.scoreColor }] },
+            '(' + s.scoreLabel + ')'
+          )
         )
       )
     ),
+
+    // Divider
+    React.createElement(View, { style: { height: 1, backgroundColor: BRAND.border, marginBottom: 4 } }),
 
     // Features
-    stop.features.map((f, i) =>
+    s.features.map((f, i) =>
       React.createElement(
         View,
-        { key: i, style: styles.transportFeatureRow },
+        { key: i, style: styles.featureRow },
         React.createElement(
           View,
-          { style: { flexDirection: 'row', alignItems: 'center', gap: 8 } },
-          React.createElement(Text, { style: { fontSize: 18 } }, f.icon),
-          React.createElement(Text, { style: styles.transportFeatureLabel }, f.label)
+          { style: { flexDirection: 'row', alignItems: 'center', gap: 10 } },
+          React.createElement(Text, { style: { fontSize: 20 } }, f.icon),
+          React.createElement(Text, { style: styles.featureLabel }, f.label)
         ),
         React.createElement(
-          Text,
-          { style: [styles.transportFeatureStatus, { color: f.statusColor }] },
-          f.statusIcon + ' ' + f.status
+          View,
+          { style: { flexDirection: 'row', alignItems: 'center', gap: 5 } },
+          React.createElement(
+            Text,
+            { style: [styles.featureStatus, { color: f.statusColor }] },
+            f.statusIcon + ' ' + f.status
+          )
         )
       )
     ),
 
-    // Boutons
+    // Buttons
     React.createElement(
       View,
-      { style: styles.transportButtons },
+      { style: styles.transportBtnRow },
       React.createElement(
         TouchableOpacity,
-        { style: styles.btnConfirm, activeOpacity: 0.8 },
-        React.createElement(Text, { style: styles.btnConfirmText }, '✓ Confirmer le statut')
+        { style: styles.btnConfirm, activeOpacity: 0.85 },
+        React.createElement(Text, { style: styles.btnConfirmText }, '✓  Confirm Status')
       ),
       React.createElement(
         TouchableOpacity,
-        { style: styles.btnReport, activeOpacity: 0.8 },
-        React.createElement(Text, { style: styles.btnReportText }, 'Signaler un problème')
+        { style: styles.btnReport, activeOpacity: 0.85 },
+        React.createElement(Text, { style: styles.btnReportText }, 'Report an Issue')
       )
     ),
+
     React.createElement(
       TouchableOpacity,
-      { style: styles.btnSeeReports, activeOpacity: 0.8 },
-      React.createElement(Text, { style: styles.btnSeeReportsText }, 'Voir les rapports vérifiés')
+      { style: styles.btnSeeReports, activeOpacity: 0.85 },
+      React.createElement(Text, { style: styles.btnSeeReportsText }, 'See verified user reports')
     )
   );
 }
 
-// ─── Composant : modal de détail ─────────────────────────────────────────────
+// ─── Place Modal ──────────────────────────────────────────────────────────────
 
-function PlaceModal(props) {
-  if (!props.place) return null;
-  const p = props.place;
-
+function PlaceModal({ place, onClose }) {
+  if (!place) return null;
+  var p = place;
   return React.createElement(
     Modal,
-    { visible: true, transparent: true, animationType: 'slide', onRequestClose: props.onClose },
+    { visible: true, transparent: true, animationType: 'slide', onRequestClose: onClose },
     React.createElement(
       TouchableOpacity,
-      { style: styles.modalOverlay, activeOpacity: 1, onPress: props.onClose },
+      { style: styles.modalOverlay, activeOpacity: 1, onPress: onClose },
       React.createElement(
         View,
         { style: styles.modalSheet },
         React.createElement(View, { style: styles.modalHandle }),
-        React.createElement(Image, { source: { uri: p.img }, style: styles.modalImg }),
+        React.createElement(Image, { source: { uri: p.img }, style: styles.modalHero }),
         React.createElement(
           View,
-          { style: styles.modalHeaderRow },
+          { style: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 14 } },
           React.createElement(
             View,
             { style: { flex: 1 } },
             React.createElement(Text, { style: styles.modalName }, p.name),
             React.createElement(Text, { style: styles.modalType }, p.type),
-            React.createElement(View, { style: { flexDirection: 'row', marginTop: 4 } }, renderStars(p.stars))
+            React.createElement(Stars, { count: p.stars })
           ),
-          React.createElement(ScoreBadge, { score: p.score, color: p.scoreColor, size: 52 })
+          React.createElement(ScoreBadge, { score: p.score, color: p.scoreColor, size: 54 })
         ),
-        React.createElement(View, { style: styles.modalDivider }),
+        React.createElement(View, { style: { height: 1, backgroundColor: BRAND.border, marginVertical: 12 } }),
         p.features.map((f, i) =>
           React.createElement(
             View,
-            { key: i, style: styles.modalFeatureRow },
+            { key: i, style: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 7 } },
             React.createElement(
               Text,
-              { style: [styles.modalFeatureIcon, { color: getFeatureColor(f.status) }] },
+              { style: { fontSize: 18 } },
               f.status === 'ok' ? '✅' : f.status === 'warning' ? '⚠️' : '❌'
             ),
-            React.createElement(Text, { style: styles.modalFeatureLabel }, f.label)
+            React.createElement(
+              Text,
+              { style: { fontSize: 14, color: BRAND.textPrimary, flex: 1 } },
+              f.label
+            )
           )
         ),
         React.createElement(
           TouchableOpacity,
-          { style: styles.modalClose, onPress: props.onClose, activeOpacity: 0.8 },
-          React.createElement(Text, { style: styles.modalCloseText }, 'Fermer')
+          { style: styles.modalCloseBtn, onPress: onClose, activeOpacity: 0.85 },
+          React.createElement(Text, { style: styles.modalCloseBtnText }, 'Close')
         )
       )
     )
   );
 }
 
-// ─── Écran principal ──────────────────────────────────────────────────────────
+// ─── Top Header ───────────────────────────────────────────────────────────────
 
-const MapScreen = ({ onNavigate, onPressProfile }) => {
-  const [activeFilter, setActiveFilter]     = useState('Restaurants & Venues');
-  const [activeCategory, setActiveCategory] = useState('Restaurants');
-  const [activeView, setActiveView]         = useState('list'); // 'transport' | 'list'
-  const [searchQuery, setSearchQuery]       = useState('');
-  const [selectedPlace, setSelectedPlace]   = useState(null);
+function TopHeader({ onPressProfile }) {
+  return React.createElement(
+    View,
+    { style: styles.topHeader },
+    React.createElement(
+      TouchableOpacity,
+      { onPress: onPressProfile, style: styles.avatarBtn },
+      React.createElement(
+        View,
+        { style: styles.avatar },
+        React.createElement(Text, { style: { fontSize: 18 } }, '👤')
+      )
+    ),
+    React.createElement(VeraLogo, { size: 26 })
+  );
+}
 
-  const filtered = PLACES.filter(
-    p =>
-      p.category === activeCategory &&
-      (searchQuery === '' || p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+// ─── Bottom Nav ───────────────────────────────────────────────────────────────
+
+function BottomNav({ onNavigate }) {
+  return React.createElement(
+    View,
+    { style: styles.bottomNav },
+    // Map tab
+    React.createElement(
+      TouchableOpacity,
+      { style: styles.navTab, onPress: () => onNavigate && onNavigate('map') },
+      React.createElement(
+        View,
+        { style: styles.navIconActive },
+        React.createElement(Text, { style: { fontSize: 22 } }, '🗺️')
+      )
+    ),
+    // Community tab
+    React.createElement(
+      TouchableOpacity,
+      { style: styles.navTab, onPress: () => onNavigate && onNavigate('community') },
+      React.createElement(Text, { style: { fontSize: 24, opacity: 0.45 } }, '👥')
+    ),
+    // SOS tab
+    React.createElement(
+      TouchableOpacity,
+      { style: [styles.navTab, styles.navSOS], onPress: () => onNavigate && onNavigate('sos') },
+      React.createElement(
+        View,
+        { style: styles.sosBtn },
+        React.createElement(Text, { style: styles.sosText }, 'SOS')
+      )
+    )
+  );
+}
+
+// ─── Main Screen ─────────────────────────────────────────────────────────────
+
+var MapScreen = function (props) {
+  var [activeFilter, setActiveFilter]       = useState('restaurants');
+  var [activeCategory, setActiveCategory]   = useState('Restaurants');
+  var [searchQuery, setSearchQuery]         = useState('');
+  var [selectedPlace, setSelectedPlace]     = useState(null);
+
+  var isTransport = activeFilter === 'transport';
+
+  var filtered = PLACES.filter((p) =>
+    p.category === activeCategory &&
+    (searchQuery === '' || p.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return React.createElement(
-    ScreenLayout,
-    { title: 'Carte', activeTab: 'map', onNavigate, onPressProfile },
+    View,
+    { style: styles.root },
 
+    // Top header
+    React.createElement(TopHeader, { onPressProfile: props.onPressProfile }),
+
+    // Search bar
     React.createElement(
       View,
-      { style: styles.screen },
-
-      // ── Barre de recherche ──
+      { style: styles.searchBar },
+      React.createElement(Text, { style: { fontSize: 14, color: BRAND.textSecondary } }, '🔍'),
+      React.createElement(TextInput, {
+        style: styles.searchInput,
+        placeholder: 'Fully accessible coffee shop near me',
+        placeholderTextColor: '#94a3b8',
+        value: searchQuery,
+        onChangeText: setSearchQuery,
+      }),
       React.createElement(
-        View,
-        { style: styles.searchBar },
-        React.createElement(Text, { style: styles.searchIcon }, '🔍'),
-        React.createElement(TextInput, {
-          style: styles.searchInput,
-          placeholder: 'Café entièrement accessible près de moi',
-          placeholderTextColor: '#94a3b8',
-          value: searchQuery,
-          onChangeText: setSearchQuery,
-        }),
-        React.createElement(Text, { style: styles.searchIcon }, '🎙️')
-      ),
+        TouchableOpacity,
+        null,
+        React.createElement(Text, { style: { fontSize: 14, color: BRAND.textSecondary } }, '🎙️')
+      )
+    ),
 
-      // ── Filtres chips ──
-      React.createElement(
-        ScrollView,
-        { horizontal: true, showsHorizontalScrollIndicator: false, style: styles.filtersRow, contentContainerStyle: { paddingHorizontal: Spacing.md } },
-        FILTERS.map(f =>
+    // Filter chips
+    React.createElement(
+      ScrollView,
+      {
+        horizontal: true,
+        showsHorizontalScrollIndicator: false,
+        style: { flexGrow: 0, marginBottom: 2 },
+        contentContainerStyle: { paddingHorizontal: 12, gap: 8, paddingVertical: 4 },
+      },
+      FILTERS.map((f) => {
+        var active = activeFilter === f.key;
+        return React.createElement(
+          TouchableOpacity,
+          {
+            key: f.key,
+            style: [
+              styles.filterChip,
+              active && { backgroundColor: f.color, borderColor: f.color },
+            ],
+            onPress: () => setActiveFilter(f.key),
+            activeOpacity: 0.8,
+          },
           React.createElement(
-            TouchableOpacity,
-            {
-              key: f,
-              style: [
-                styles.filterChip,
-                activeFilter === f && {
-                  backgroundColor:
-                    f === 'Public Transport' ? '#22c55e' :
-                    f === 'Restaurants & Venues' ? '#ef4444' : '#64748b',
-                },
-              ],
-              onPress: () => { setActiveFilter(f); setActiveView(f === 'Public Transport' ? 'transport' : 'list'); },
-              activeOpacity: 0.8,
-            },
-            React.createElement(
-              Text,
-              {
-                style: [
-                  styles.filterChipText,
-                  activeFilter === f && { color: '#fff' },
-                ],
-              },
-              (f === 'Public Transport' ? '🚌 ' : f === 'Restaurants & Venues' ? '🍽️ ' : '📍 ') + f
-            )
+            Text,
+            { style: [styles.filterChipText, active && { color: '#fff' }] },
+            f.icon + '  ' + f.label
           )
+        );
+      })
+    ),
+
+    // Map
+    React.createElement(MapView, { activeFilter }),
+
+    // Content area
+    isTransport
+      ? React.createElement(
+          ScrollView,
+          { style: { flex: 1, backgroundColor: BRAND.bg }, contentContainerStyle: { padding: 14 } },
+          React.createElement(TransportCard, null)
         )
-      ),
-
-      // ── Carte simulée ──
-      React.createElement(MockMap),
-
-      // ── Vue Transport ──
-      activeView === 'transport' && React.createElement(
-        ScrollView,
-        { style: styles.contentScroll, contentContainerStyle: { padding: Spacing.md } },
-        React.createElement(TransportCard)
-      ),
-
-      // ── Vue Liste de lieux ──
-      activeView === 'list' && React.createElement(
-        View,
-        { style: styles.listContainer },
-
-        // Onglets catégories
-        React.createElement(
+      : React.createElement(
           View,
-          { style: styles.categoryTabs },
-          CATEGORIES.map(cat =>
-            React.createElement(
-              TouchableOpacity,
-              {
-                key: cat,
-                style: [styles.categoryTab, activeCategory === cat && styles.categoryTabActive],
-                onPress: () => setActiveCategory(cat),
-                activeOpacity: 0.8,
-              },
-              React.createElement(
-                Text,
-                { style: [styles.categoryTabText, activeCategory === cat && styles.categoryTabTextActive] },
-                cat
-              )
-            )
+          { style: { flex: 1, backgroundColor: '#fff' } },
+
+          // Category tabs
+          React.createElement(
+            View,
+            { style: styles.catTabsRow },
+            CATEGORIES.map((cat) => {
+              var active = activeCategory === cat;
+              return React.createElement(
+                TouchableOpacity,
+                {
+                  key: cat,
+                  style: [styles.catTab, active && styles.catTabActive],
+                  onPress: () => setActiveCategory(cat),
+                  activeOpacity: 0.8,
+                },
+                React.createElement(
+                  Text,
+                  { style: [styles.catTabText, active && styles.catTabTextActive] },
+                  cat
+                )
+              );
+            })
+          ),
+
+          // List
+          React.createElement(
+            ScrollView,
+            { style: { flex: 1 }, showsVerticalScrollIndicator: false },
+            filtered.length === 0
+              ? React.createElement(
+                  View,
+                  { style: { alignItems: 'center', paddingVertical: 40 } },
+                  React.createElement(Text, { style: { fontSize: 36 } }, '🔍'),
+                  React.createElement(
+                    Text,
+                    { style: { fontSize: 14, color: BRAND.textSecondary, marginTop: 8 } },
+                    'No results'
+                  )
+                )
+              : filtered.map((place) =>
+                  React.createElement(PlaceRow, {
+                    key: place.id,
+                    place,
+                    onPress: setSelectedPlace,
+                  })
+                )
           )
         ),
 
-        // Liste
-        React.createElement(
-          ScrollView,
-          { style: styles.placesList, showsVerticalScrollIndicator: false },
-          filtered.length === 0
-            ? React.createElement(
-                View,
-                { style: styles.emptyState },
-                React.createElement(Text, { style: styles.emptyIcon }, '🔍'),
-                React.createElement(Text, { style: styles.emptyText }, 'Aucun résultat')
-              )
-            : filtered.map(place =>
-                React.createElement(PlaceRow, {
-                  key: place.id,
-                  place,
-                  onPress: setSelectedPlace,
-                })
-              )
-        )
-      ),
+    // Bottom nav
+    React.createElement(BottomNav, { onNavigate: props.onNavigate }),
 
-      // ── Modal détail lieu ──
-      React.createElement(PlaceModal, {
-        place: selectedPlace,
-        onClose: () => setSelectedPlace(null),
-      })
-    )
+    // Modal
+    React.createElement(PlaceModal, {
+      place: selectedPlace,
+      onClose: () => setSelectedPlace(null),
+    })
   );
 };
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
-  screen: {
+var styles = StyleSheet.create({
+  root: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#fff',
   },
 
-  // Recherche
+  // Header
+  topHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingTop: 12,
+    paddingBottom: 8,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: BRAND.border,
+  },
+  avatarBtn: { padding: 2 },
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#e2e8f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Search
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f1f5f9',
     borderRadius: 12,
-    marginHorizontal: Spacing.md,
-    marginVertical: Spacing.sm,
+    marginHorizontal: 12,
+    marginTop: 10,
+    marginBottom: 6,
     paddingHorizontal: 12,
     paddingVertical: 10,
     gap: 8,
-  },
-  searchIcon: {
-    fontSize: 16,
-    color: '#94a3b8',
+    borderWidth: 1,
+    borderColor: BRAND.border,
   },
   searchInput: {
     flex: 1,
-    fontSize: Typography.md,
-    color: Colors.textPrimary,
-    fontFamily: undefined,
+    fontSize: 13,
+    color: BRAND.textPrimary,
   },
 
-  // Filtres
-  filtersRow: {
-    marginBottom: Spacing.sm,
-  },
+  // Filter chips
   filterChip: {
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: '#e2e8f0',
-    marginRight: 8,
+    backgroundColor: '#f1f5f9',
+    borderWidth: 1.5,
+    borderColor: BRAND.border,
   },
   filterChipText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#64748b',
+    fontWeight: '700',
+    color: BRAND.textSecondary,
   },
 
-  // Carte simulée
-  mapContainer: {
-    height: 180,
-    backgroundColor: '#e8f4f8',
-    position: 'relative',
-    overflow: 'hidden',
+  // Category tabs
+  catTabsRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: BRAND.border,
+    paddingHorizontal: 4,
+    backgroundColor: '#fff',
   },
-  mapBg: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#dbeafe',
-  },
-  mapRiver: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: '52%',
-    height: 14,
-    backgroundColor: '#93c5fd',
-    opacity: 0.5,
-    borderRadius: 4,
-  },
-  mapBlock: {
-    position: 'absolute',
-    backgroundColor: '#f0fdf4',
-    borderRadius: 4,
-    opacity: 0.7,
-  },
-  mapStreetH1: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: '35%',
-    height: 5,
-    backgroundColor: '#c8d8e8',
-  },
-  mapStreetH2: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: '62%',
-    height: 4,
-    backgroundColor: '#c8d8e8',
-  },
-  mapStreetV1: {
-    position: 'absolute',
-    left: '32%',
-    top: 0,
-    bottom: 0,
-    width: 5,
-    backgroundColor: '#c8d8e8',
-  },
-  mapStreetV2: {
-    position: 'absolute',
-    left: '62%',
-    top: 0,
-    bottom: 0,
-    width: 4,
-    backgroundColor: '#c8d8e8',
-  },
-  mapPin: {
-    position: 'absolute',
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  mapPinText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  mapMetroPin: {
-    position: 'absolute',
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#dc2626',
-    borderWidth: 2,
-    borderColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mapMetroText: {
-    color: '#fff',
-    fontWeight: '800',
-    fontSize: 13,
-  },
-  mapUserDot: {
-    position: 'absolute',
-    left: '38%',
-    top: '44%',
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#2563eb',
-    borderWidth: 2,
-    borderColor: '#fff',
-    zIndex: 10,
-  },
-  mapUserPulse: {
-    position: 'absolute',
-    left: '36.5%',
-    top: '40%',
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: 'rgba(37,99,235,0.25)',
-    zIndex: 9,
-  },
-
-  // Transport
-  contentScroll: {
+  catTab: {
     flex: 1,
+    paddingVertical: 11,
+    alignItems: 'center',
+    borderBottomWidth: 2.5,
+    borderBottomColor: 'transparent',
+    marginBottom: -1,
   },
+  catTabActive: { borderBottomColor: BRAND.primary },
+  catTabText: { fontSize: 12, fontWeight: '700', color: '#94a3b8' },
+  catTabTextActive: { color: BRAND.primary },
+
+  // Place row
+  placeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f8fafc',
+    gap: 10,
+    backgroundColor: '#fff',
+  },
+  placeImg: {
+    width: 54,
+    height: 54,
+    borderRadius: 10,
+    backgroundColor: '#e2e8f0',
+    flexShrink: 0,
+  },
+  placeInfo: { flex: 1, minWidth: 0 },
+  placeName: { fontSize: 13, fontWeight: '800', color: BRAND.textPrimary },
+  placeType: { fontSize: 11, color: BRAND.textSecondary, marginTop: 2 },
+
+  // Transport card
   transportCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: BRAND.border,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 8,
+    elevation: 3,
   },
   transportHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 14,
-    gap: 8,
+    marginBottom: 12,
+    gap: 10,
   },
   transportName: {
-    fontSize: Typography.md,
-    fontWeight: '800',
-    color: Colors.textPrimary,
-    marginBottom: 2,
+    fontSize: 16,
+    fontWeight: '900',
+    color: BRAND.textPrimary,
+    marginBottom: 3,
   },
-  transportReports: {
+  transportMeta: {
     fontSize: 11,
-    color: Colors.textSecondary,
+    color: BRAND.textSecondary,
+    lineHeight: 16,
   },
   transportScoreLabel: {
     fontSize: 11,
-    color: Colors.textSecondary,
+    color: BRAND.textSecondary,
     marginBottom: 2,
     textAlign: 'right',
   },
-  transportScore: {
-    fontSize: 24,
-    fontWeight: '800',
+  transportScoreNum: {
+    fontSize: 28,
+    fontWeight: '900',
+    lineHeight: 32,
   },
-  transportScoreSub: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  transportFeatureRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
-  },
-  transportFeatureLabel: {
-    fontSize: Typography.md,
-    fontWeight: '500',
-    color: Colors.textPrimary,
-  },
-  transportFeatureStatus: {
+  transportScoreTag: {
     fontSize: 12,
     fontWeight: '700',
   },
-  transportButtons: {
+  featureRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 11,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  featureLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: BRAND.textPrimary,
+  },
+  featureStatus: {
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  transportBtnRow: {
     flexDirection: 'row',
     gap: 8,
     marginTop: 14,
   },
   btnConfirm: {
     flex: 1,
-    backgroundColor: '#2563eb',
-    borderRadius: 10,
-    paddingVertical: 11,
+    backgroundColor: BRAND.primary,
+    borderRadius: 12,
+    paddingVertical: 12,
     alignItems: 'center',
+    shadowColor: BRAND.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  btnConfirmText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 13,
-  },
+  btnConfirmText: { color: '#fff', fontWeight: '800', fontSize: 13 },
   btnReport: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
-    borderRadius: 10,
-    paddingVertical: 11,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingVertical: 12,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderWidth: 1.5,
+    borderColor: BRAND.border,
   },
-  btnReportText: {
-    color: '#475569',
-    fontWeight: '600',
-    fontSize: 13,
-  },
+  btnReportText: { color: BRAND.textSecondary, fontWeight: '700', fontSize: 13 },
   btnSeeReports: {
     marginTop: 8,
-    borderRadius: 10,
-    paddingVertical: 10,
+    borderRadius: 12,
+    paddingVertical: 11,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderWidth: 1.5,
+    borderColor: BRAND.border,
   },
-  btnSeeReportsText: {
-    color: '#64748b',
-    fontSize: 13,
-  },
+  btnSeeReportsText: { color: BRAND.textSecondary, fontSize: 13, fontWeight: '500' },
 
-  // Liste lieux
-  listContainer: {
-    flex: 1,
-  },
-  categoryTabs: {
+  // Bottom Nav
+  bottomNav: {
     flexDirection: 'row',
-    borderBottomWidth: 2,
-    borderBottomColor: '#f1f5f9',
-    backgroundColor: '#fff',
-    paddingHorizontal: Spacing.sm,
-  },
-  categoryTab: {
-    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-around',
     paddingVertical: 10,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-    marginBottom: -2,
-  },
-  categoryTabActive: {
-    borderBottomColor: '#2563eb',
-  },
-  categoryTabText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#94a3b8',
-  },
-  categoryTabTextActive: {
-    color: '#2563eb',
-  },
-  placesList: {
-    flex: 1,
-    paddingHorizontal: Spacing.md,
+    paddingBottom: 16,
     backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: BRAND.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 8,
   },
-  placeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-    gap: 10,
-  },
-  placeImg: {
-    width: 52,
-    height: 52,
-    borderRadius: 10,
-    backgroundColor: '#e2e8f0',
-  },
-  placeInfo: {
+  navTab: {
     flex: 1,
-    minWidth: 0,
-  },
-  placeNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    flexWrap: 'wrap',
-  },
-  placeName: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-  },
-  placeType: {
-    fontSize: 11,
-    color: Colors.textSecondary,
-    marginBottom: 3,
-  },
-  placeFeatures: {
-    flexDirection: 'row',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  placeFeatureText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-
-  // Score badge
-  scoreBadge: {
     alignItems: 'center',
     justifyContent: 'center',
-    flexShrink: 0,
+    paddingVertical: 4,
   },
-  scoreBadgeText: {
+  navIconActive: {
+    backgroundColor: BRAND.primary + '18',
+    borderRadius: 12,
+    padding: 6,
+  },
+  navSOS: {},
+  sosBtn: {
+    backgroundColor: '#334155',
+    borderRadius: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+  },
+  sosText: {
     color: '#fff',
-    fontWeight: '800',
-  },
-
-  // État vide
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 40,
-    gap: 8,
-  },
-  emptyIcon: {
-    fontSize: 36,
-  },
-  emptyText: {
-    fontSize: Typography.md,
-    color: Colors.textSecondary,
+    fontWeight: '900',
+    fontSize: 13,
+    letterSpacing: 0.5,
   },
 
   // Modal
@@ -934,10 +1039,10 @@ const styles = StyleSheet.create({
   },
   modalSheet: {
     backgroundColor: '#fff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     padding: 20,
-    paddingBottom: 32,
+    paddingBottom: 36,
   },
   modalHandle: {
     width: 40,
@@ -947,60 +1052,28 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: 16,
   },
-  modalImg: {
+  modalHero: {
     width: '100%',
-    height: 140,
-    borderRadius: 12,
+    height: 150,
+    borderRadius: 14,
     marginBottom: 14,
     backgroundColor: '#e2e8f0',
   },
-  modalHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    marginBottom: 14,
-  },
-  modalName: {
-    fontSize: Typography.lg,
-    fontWeight: '800',
-    color: Colors.textPrimary,
-  },
-  modalType: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    marginTop: 2,
-  },
-  modalDivider: {
-    height: 1,
-    backgroundColor: '#f1f5f9',
-    marginBottom: 12,
-  },
-  modalFeatureRow: {
-    flexDirection: 'row',
+  modalName: { fontSize: 18, fontWeight: '900', color: BRAND.textPrimary },
+  modalType: { fontSize: 13, color: BRAND.textSecondary, marginTop: 2, marginBottom: 4 },
+  modalCloseBtn: {
+    marginTop: 18,
+    backgroundColor: BRAND.primary,
+    borderRadius: 14,
+    paddingVertical: 14,
     alignItems: 'center',
-    gap: 10,
-    paddingVertical: 6,
+    shadowColor: BRAND.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  modalFeatureIcon: {
-    fontSize: 18,
-  },
-  modalFeatureLabel: {
-    fontSize: Typography.md,
-    color: Colors.textPrimary,
-    flex: 1,
-  },
-  modalClose: {
-    marginTop: 16,
-    backgroundColor: '#2563eb',
-    borderRadius: 12,
-    paddingVertical: 13,
-    alignItems: 'center',
-  },
-  modalCloseText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: Typography.md,
-  },
+  modalCloseBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
 });
 
 export default MapScreen;

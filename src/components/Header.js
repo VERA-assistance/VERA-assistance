@@ -1,32 +1,35 @@
 // ─────────────────────────────────────────────
-//  AccessiWay — Header Component
+//  VERA — Header Component
 //
 //  Props :
-//    title        (string)  — titre affiché au centre (optionnel)
-//    onPressProfile (func)  — callback bouton profil
+//    title          (string) — titre central (optionnel)
+//    onPressProfile (func)   — callback bouton profil
 // ─────────────────────────────────────────────
 
-import React from 'react';
+import React, { useRef } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  StatusBar,
+  View, Text, TouchableOpacity,
+  Image, StyleSheet, StatusBar, Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors, Spacing, Typography, Shadows } from '../theme/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors, Spacing, Typography, Shadows, Radius } from '../theme/theme';
 
-// ── Logo ──────────────────────────────────────
-// Remplacez cette source par votre logo final :
-//   require('../../assets/images/logo.png')
-// ou un URI distant :
-//   { uri: 'https://...' }
-const LOGO_SOURCE = null; // null = affiche le placeholder texte
+// ── 🔽 Remplacez cette URL par votre vrai logo ──
+const LOGO_SOURCE = require('../../assets/logo.png');
+// Ou en local : require('../../assets/logo.png')
 
 const Header = ({ title, onPressProfile }) => {
-  const insets = useSafeAreaInsets();
+  const insets     = useSafeAreaInsets();
+  const scaleAnim  = useRef(new Animated.Value(1)).current;
+
+  const handleProfilePress = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, { toValue: 0.88, duration: 70, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, damping: 10, stiffness: 200 }),
+    ]).start();
+    if (onPressProfile) onPressProfile();
+  };
 
   return (
     <View style={[styles.wrapper, { paddingTop: insets.top }]}>
@@ -36,49 +39,38 @@ const Header = ({ title, onPressProfile }) => {
 
         {/* ── Bouton Profil (gauche) ── */}
         <TouchableOpacity
-          style={styles.profileButton}
-          onPress={onPressProfile}
+          onPress={handleProfilePress}
           accessibilityLabel="Ouvrir mon profil"
           accessibilityRole="button"
-          activeOpacity={0.75}
+          activeOpacity={1}
         >
-          <View style={styles.profileAvatar}>
-            {/* Remplacer par une image utilisateur si disponible */}
-            <Text style={styles.profileInitial}>P</Text>
-          </View>
+          <Animated.View style={[styles.profileButton, { transform: [{ scale: scaleAnim }] }]}>
+            <Ionicons name="person" size={18} color={Colors.primary} />
+          </Animated.View>
         </TouchableOpacity>
 
         {/* ── Titre central (optionnel) ── */}
         {title ? (
-          <Text style={styles.title} numberOfLines={1}>
-            {title}
-          </Text>
+          <Text style={styles.title} numberOfLines={1}>{title}</Text>
         ) : (
           <View style={styles.titlePlaceholder} />
         )}
 
         {/* ── Logo (droite) ── */}
-        <TouchableOpacity
-          style={styles.logoContainer}
-          accessibilityLabel="AccessiWay"
-          accessibilityRole="image"
-          activeOpacity={0.85}
-        >
-          {LOGO_SOURCE ? (
-            <Image
-              source={LOGO_SOURCE}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-          ) : (
-            // Placeholder — remplacez par votre logo
-            <View style={styles.logoPlaceholder}>
-              <Text style={styles.logoPlaceholderText}>AW</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        <View style={styles.logoContainer}>
+          <Image
+            source={LOGO_SOURCE}
+            style={styles.logoImage}
+            resizeMode="contain"
+            // Fallback si l'image ne charge pas
+            onError={() => {}}
+          />
+        </View>
 
       </View>
+
+      {/* Ligne de séparation subtile */}
+      <View style={styles.bottomBorder} />
     </View>
   );
 };
@@ -86,8 +78,6 @@ const Header = ({ title, onPressProfile }) => {
 const styles = StyleSheet.create({
   wrapper: {
     backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
     ...Shadows.sm,
   },
   container: {
@@ -95,31 +85,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm + 2,
-    height: 60,
+    height: 58,
   },
 
   // ── Profil ──
   profileButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  profileAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    borderRadius: Radius.md,
     backgroundColor: Colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: Colors.primary,
-  },
-  profileInitial: {
-    fontSize: Typography.md,
-    fontWeight: Typography.bold,
-    color: Colors.primary,
+    borderWidth: 1.5,
+    borderColor: Colors.primary + '30',
   },
 
   // ── Titre ──
@@ -145,20 +123,14 @@ const styles = StyleSheet.create({
   logoImage: {
     width: 40,
     height: 40,
+    borderRadius: Radius.sm,
   },
-  logoPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoPlaceholderText: {
-    fontSize: Typography.sm,
-    fontWeight: Typography.extrabold,
-    color: Colors.white,
-    letterSpacing: 0.5,
+
+  // ── Séparateur ──
+  bottomBorder: {
+    height: 1,
+    backgroundColor: Colors.border,
+    opacity: 0.6,
   },
 });
 

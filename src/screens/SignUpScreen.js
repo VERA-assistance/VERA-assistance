@@ -28,6 +28,8 @@ const SignUpScreen = ({ navigation }) => {
   const [step, setStep] = useState(1);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [selectedSituations, setSelectedSituations] = useState([]);
+  const [selectedDisplayMode, setSelectedDisplayMode] = useState('standard');
+  const [selectedAssistiveControls, setSelectedAssistiveControls] = useState([]);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -51,6 +53,9 @@ const SignUpScreen = ({ navigation }) => {
   const renderStep1 = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.title}>Langue & Préférences</Text>
+      
+      {/* Sélection de la langue */}
+      <Text style={styles.sectionTitle}>Langue</Text>
       {languages.map(lang => (
         <TouchableOpacity
           key={lang.code}
@@ -60,6 +65,55 @@ const SignUpScreen = ({ navigation }) => {
           <Text style={styles.optionText}>{lang.flag} {lang.name}</Text>
         </TouchableOpacity>
       ))}
+      
+      {/* Modes d'affichage */}
+      <Text style={styles.sectionTitle}>Modes d'affichage</Text>
+      <TouchableOpacity
+        style={[styles.optionButton, selectedDisplayMode === 'contrasted' && styles.selectedOption]}
+        onPress={() => setSelectedDisplayMode('contrasted')}
+      >
+        <Text style={styles.optionText}>🎨 Mode Contrasté</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.optionButton, selectedDisplayMode === 'simplified' && styles.selectedOption]}
+        onPress={() => setSelectedDisplayMode('simplified')}
+      >
+        <Text style={styles.optionText}>📱 Interface Simplifiée</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.optionButton, selectedDisplayMode === 'standard' && styles.selectedOption]}
+        onPress={() => setSelectedDisplayMode('standard')}
+      >
+        <Text style={styles.optionText}>⚙️ Interface Standard</Text>
+      </TouchableOpacity>
+      
+      {/* Contrôle Assisté */}
+      <Text style={styles.sectionTitle}>Contrôle Assisté</Text>
+      <TouchableOpacity
+        style={[styles.optionButton, selectedAssistiveControls.includes('voice') && styles.selectedOption]}
+        onPress={() => {
+          setSelectedAssistiveControls(prev => 
+            prev.includes('voice') 
+              ? prev.filter(c => c !== 'voice')
+              : [...prev, 'voice']
+          );
+        }}
+      >
+        <Text style={styles.optionText}>🎤 Voice Control (Commande vocale)</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.optionButton, selectedAssistiveControls.includes('eyes') && styles.selectedOption]}
+        onPress={() => {
+          setSelectedAssistiveControls(prev => 
+            prev.includes('eyes') 
+              ? prev.filter(c => c !== 'eyes')
+              : [...prev, 'eyes']
+          );
+        }}
+      >
+        <Text style={styles.optionText}>👁️ Eyes Control (Contrôle oculaire)</Text>
+      </TouchableOpacity>
+      
       <TouchableOpacity style={styles.button} onPress={() => setStep(2)}>
         <Text style={styles.buttonText}>Continuer</Text>
       </TouchableOpacity>
@@ -197,6 +251,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     flex: 1,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#333',
+    marginTop: 20,
+    marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,

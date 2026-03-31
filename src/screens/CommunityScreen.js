@@ -49,7 +49,7 @@ const CATEGORIES = ['Tous', 'Problème', 'Info', 'Résolu'];
 const CATEGORIE = ['Tous', 'Question', 'Conseil', 'Aide', 'Événement'];
 const POST_CATEGORIES = ['Question', 'Conseil', 'Aide', 'Événement'];
 
-// ─── ALERTES PMR – LYON (MOCK DATA) ────────────────────────────────────────────
+// ─── Mock data ────────────────────────────────────────────────────────────────
 
 const INITIAL_POSTS = [
   {
@@ -208,9 +208,8 @@ const PostCard = ({ post }) => {
       <View style={[styles.cardAccentBar, { backgroundColor: cfg.leftBorder }]} />
 
       <View style={styles.cardInner}>
-        {/* Top row */}
         <View style={styles.cardTopRow}>
-          <View style={[styles.categoryTag, { backgroundColor: cfg.bg, borderColor: cfg.border }]}>
+          <View style={[styles.categoryTag, { backgroundColor: cfg.bg }]}>
             <Text style={[styles.categoryTagText, { color: cfg.color }]}>
               {cfg.dot}  {post.category}
             </Text>
@@ -236,7 +235,6 @@ const PostCard = ({ post }) => {
         {/* Extrait */}
         <Text style={styles.postExcerpt} numberOfLines={2}>{post.excerpt}</Text>
 
-        {/* Footer */}
         <View style={styles.cardFooter}>
           <Avatar name={post.author.name} size={30} />
           <View style={styles.authorBlock}>
@@ -261,17 +259,15 @@ const PostCard = ({ post }) => {
 };
 
 const NewPostModal = ({ visible, onClose, onSubmit }) => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [category, setCategory] = useState('Problème');
+  const [title, setTitle]       = useState('');
+  const [content, setContent]   = useState('');
+  const [category, setCategory] = useState('Question');
 
   const handleSubmit = () => {
     if (!title.trim() || !content.trim()) return;
     onSubmit({
       id: Date.now().toString(),
-      title,
-      excerpt: content,
-      category,
+      title, excerpt: content, category,
       time: "À l'instant",
       author: { name: 'Moi', role: '' },
       replies: 0, likes: 0,
@@ -291,34 +287,36 @@ const NewPostModal = ({ visible, onClose, onSubmit }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Nouvelle alerte accessibilité</Text>
+          <Text style={styles.modalTitle}>Nouvelle publication</Text>
 
           <TextInput
-            placeholder="Titre du problème"
+            placeholder="Titre"
             value={title}
             onChangeText={setTitle}
             style={styles.input}
+            placeholderTextColor={COLORS.text.muted}
           />
           <TextInput
-            placeholder="Décrivez le problème rencontré"
+            placeholder="Décrivez votre situation ou conseil..."
             value={content}
             onChangeText={setContent}
             multiline
-            style={[styles.input, { height: 100 }]}
+            style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
+            placeholderTextColor={COLORS.text.muted}
           />
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
             {CATEGORIES.filter((c) => c !== 'Tous').map((c) => (
               <CategoryPill key={c} label={c} active={category === c} onPress={() => setCategory(c)} />
             ))}
           </ScrollView>
 
           <View style={styles.modalActions}>
-            <TouchableOpacity onPress={onClose}>
-              <Text style={styles.cancel}>Annuler</Text>
+            <TouchableOpacity onPress={onClose} style={styles.cancelBtn}>
+              <Text style={styles.cancelText}>Annuler</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleSubmit}>
-              <Text style={styles.submit}>Publier</Text>
+            <TouchableOpacity onPress={handleSubmit} style={styles.submitBtn}>
+              <Text style={styles.submitText}>Publier</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -417,7 +415,7 @@ export default function CommunityScreen({ onNavigate, onPressProfile }) {
   );
 }
 
-// ─── Styles ────────────────────────────────────────────────────────────────────
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   screen: {
@@ -441,6 +439,9 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     marginRight: 8,
     backgroundColor: COLORS.surface,
+    marginHorizontal: 16, marginTop: 12, marginBottom: 4,
+    borderRadius: 12, paddingHorizontal: 14,
+    borderWidth: 1, borderColor: COLORS.border,
   },
   pillEmoji: { marginRight: 6 },
   pillText: { fontSize: 13, fontWeight: '600' },
@@ -550,10 +551,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     shadowColor: COLORS.accent.navy,
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 8,
-    gap: 8,
+    shadowOpacity: 0.35, shadowRadius: 16, elevation: 8,
   },
   fabIcon: { fontSize: 20, color: '#fff', fontWeight: '300', lineHeight: 22 },
   fabLabel: { color: '#fff', fontWeight: '700' },

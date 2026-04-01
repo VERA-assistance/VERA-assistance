@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  AccessiWay — Écran Carte (Map)
+//  VERA — Écran Carte (Map)
 // ─────────────────────────────────────────────
 
 import React, { useState } from 'react';
@@ -94,34 +94,60 @@ function ScoreBadge({ score, color, size = 40 }) {
   );
 }
 
-// ─── Map View ─────────────────────────────────────────────────────────────────
+// ─── Map View (Interactive - Lyon) ────────────────────────────────────────────
+
+import { WebView } from 'react-native-webview';
 
 function MapView({ activeFilter }) {
-  var MAP_H = 220;
-  var W = SCREEN_W;
-  return React.createElement(
-    View, { style: { width: W, height: MAP_H, overflow: 'hidden' } },
-    React.createElement(View, { style: { position: 'absolute', inset: 0, backgroundColor: '#e8f4f8' } }),
-    React.createElement(View, { style: { position: 'absolute', top: MAP_H * 0.30, left: -20, width: W + 40, height: 28, backgroundColor: '#93c5fd', opacity: 0.85, transform: [{ rotate: '-6deg' }] } }),
-    React.createElement(View, { style: { position: 'absolute', top: 8, left: 8, width: W * 0.26, height: MAP_H * 0.32, backgroundColor: '#dcfce7', borderRadius: 6, opacity: 0.75 } }),
-    React.createElement(View, { style: { position: 'absolute', top: 8, left: W * 0.36, width: W * 0.24, height: MAP_H * 0.25, backgroundColor: '#fef9c3', borderRadius: 6, opacity: 0.75 } }),
-    React.createElement(View, { style: { position: 'absolute', top: MAP_H * 0.52, left: W * 0.28, width: W * 0.32, height: MAP_H * 0.38, backgroundColor: '#eff6ff', borderRadius: 6, opacity: 0.7 } }),
-    React.createElement(View, { style: { position: 'absolute', top: MAP_H * 0.38, left: W * 0.64, width: W * 0.32, height: MAP_H * 0.42, backgroundColor: '#f0fdf4', borderRadius: 6, opacity: 0.65 } }),
-    ...[0.30, 0.58, 0.15, 0.75].map((t, i) => React.createElement(View, { key: 'hr' + i, style: { position: 'absolute', top: MAP_H * t, left: 0, right: 0, height: i < 2 ? 5 : 3, backgroundColor: '#fff', opacity: i < 2 ? 0.9 : 0.6 } })),
-    ...[0.30, 0.62, 0.11, 0.84].map((l, i) => React.createElement(View, { key: 'vr' + i, style: { position: 'absolute', top: 0, bottom: 0, left: W * l, width: i < 2 ? 4 : 3, backgroundColor: '#fff', opacity: i < 2 ? 0.9 : 0.6 } })),
-    React.createElement(View, { style: { position: 'absolute', top: MAP_H * 0.70, left: W * 0.04, width: W * 0.42, height: 3, backgroundColor: BRAND.primary, opacity: 0.8, transform: [{ rotate: '-16deg' }] } }),
-    React.createElement(View, { style: { position: 'absolute', top: MAP_H * 0.40, left: W * 0.36, width: W * 0.52, height: 3, backgroundColor: BRAND.primary, opacity: 0.8, transform: [{ rotate: '-16deg' }] } }),
-    React.createElement(TouchableOpacity, { style: { position: 'absolute', top: MAP_H * 0.45, left: W * 0.39, width: 30, height: 30, borderRadius: 8, backgroundColor: '#dc2626', borderWidth: 2.5, borderColor: '#fff', alignItems: 'center', justifyContent: 'center', elevation: 5 } },
-      React.createElement(Text, { style: { color: '#fff', fontWeight: '900', fontSize: 13 } }, 'M')
-    ),
-    PLACES.map((p) => React.createElement(View, { key: p.id, style: { position: 'absolute', top: MAP_H * p.py - 14, left: W * p.px - 20, backgroundColor: p.scoreColor, paddingHorizontal: 7, paddingVertical: 4, borderRadius: 8, borderWidth: 2, borderColor: '#fff', elevation: 5 } },
-      React.createElement(Text, { style: { color: '#fff', fontWeight: '900', fontSize: 12 } }, String(p.score))
-    )),
-    React.createElement(View, { style: { position: 'absolute', top: MAP_H * 0.48 - 14, left: W * 0.44 - 14, width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(37,99,235,0.18)' } }),
-    React.createElement(View, { style: { position: 'absolute', top: MAP_H * 0.48 - 8, left: W * 0.44 - 8, width: 16, height: 16, borderRadius: 8, backgroundColor: BRAND.primary, borderWidth: 2.5, borderColor: '#fff', elevation: 7 } }),
-    React.createElement(TouchableOpacity, { style: { position: 'absolute', top: 10, right: 10, width: 34, height: 34, backgroundColor: '#fff', borderRadius: 8, alignItems: 'center', justifyContent: 'center', elevation: 3 } },
-      React.createElement(Text, { style: { fontSize: 16 } }, '🗺️')
-    )
+
+  const html = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, width=device-width">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+      body { margin:0; }
+      #map { height:100vh; width:100vw; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      var map = L.map('map').setView([45.764043, 4.835659], 13);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+
+      // Exemple marker Lyon
+      L.marker([45.764043, 4.835659])
+        .addTo(map)
+        .bindPopup("📍 Centre Lyon");
+
+      ${PLACES.map(p => `
+        L.marker([
+          ${45.764043 + (p.py - 0.5) * 0.1},
+          ${4.835659 + (p.px - 0.5) * 0.1}
+        ])
+        .addTo(map)
+        .bindPopup("${p.name} - Score: ${p.score}");
+      `).join('')}
+
+    </script>
+  </body>
+  </html>
+  `;
+
+  return (
+    <View style={{ width: SCREEN_W, height: 260 }}>
+      <WebView
+        originWhitelist={['*']}
+        source={{ html }}
+        style={{ flex: 1 }}
+      />
+    </View>
   );
 }
 

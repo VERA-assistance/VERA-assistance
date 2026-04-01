@@ -9,7 +9,7 @@
 [ ⚠️ ] > Projet en développement actif !
 
 
-# VERA_assistance — Base de projet collaboratif
+# AccessiWay — Base de projet collaboratif
 
 Application mobile de navigation accessible (type Waze pour personnes en situation de handicap).
 
@@ -18,7 +18,7 @@ Application mobile de navigation accessible (type Waze pour personnes en situati
 ## 📁 Structure des fichiers
 
 ```
-VERA_assistance/
+AccessiWay/
 ├── App.js                          ← Point d'entrée + gestion navigation
 ├── package.json
 │

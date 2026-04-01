@@ -56,63 +56,102 @@ const SignUpScreen = ({ navigation }) => {
       
       {/* Sélection de la langue */}
       <Text style={styles.sectionTitle}>Langue</Text>
-      {languages.map(lang => (
-        <TouchableOpacity
-          key={lang.code}
-          style={[styles.optionButton, selectedLanguage === lang.code && styles.selectedOption]}
-          onPress={() => setSelectedLanguage(lang.code)}
-        >
-          <Text style={styles.optionText}>{lang.flag} {lang.name}</Text>
-        </TouchableOpacity>
-      ))}
+      <View style={styles.optionContainer}>
+        {languages.map(lang => (
+          <TouchableOpacity
+            key={lang.code}
+            style={[styles.optionCard, selectedLanguage === lang.code && styles.selectedOptionCard]}
+            onPress={() => setSelectedLanguage(lang.code)}
+          >
+            <Text style={styles.optionCardFlag}>{lang.flag}</Text>
+            <Text style={[styles.optionCardText, selectedLanguage === lang.code && styles.selectedOptionCardText]}>
+              {lang.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
       
       {/* Modes d'affichage */}
-      <Text style={styles.sectionTitle}>Modes d'affichage</Text>
-      <TouchableOpacity
-        style={[styles.optionButton, selectedDisplayMode === 'contrasted' && styles.selectedOption]}
-        onPress={() => setSelectedDisplayMode('contrasted')}
-      >
-        <Text style={styles.optionText}>🎨 Mode Contrasté</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.optionButton, selectedDisplayMode === 'simplified' && styles.selectedOption]}
-        onPress={() => setSelectedDisplayMode('simplified')}
-      >
-        <Text style={styles.optionText}>📱 Interface Simplifiée</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.optionButton, selectedDisplayMode === 'standard' && styles.selectedOption]}
-        onPress={() => setSelectedDisplayMode('standard')}
-      >
-        <Text style={styles.optionText}>⚙️ Interface Standard</Text>
-      </TouchableOpacity>
+      <Text style={styles.sectionTitle}>Mode d'affichage</Text>
+      <View style={styles.optionContainer}>
+        <TouchableOpacity
+          style={[styles.optionCard, selectedDisplayMode === 'standard' && styles.selectedOptionCard]}
+          onPress={() => setSelectedDisplayMode('standard')}
+        >
+          <Text style={styles.optionCardIcon}>Aa</Text>
+          <Text style={[styles.optionCardLabel, selectedDisplayMode === 'standard' && styles.selectedOptionCardText]}>
+            Standard Mode
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.optionCard, selectedDisplayMode === 'simplified' && styles.selectedOptionCard]}
+          onPress={() => setSelectedDisplayMode('simplified')}
+        >
+          <Text style={styles.optionCardIcon}>Aa</Text>
+          <Text style={[styles.optionCardLabel, selectedDisplayMode === 'simplified' && styles.selectedOptionCardText]}>
+            Simplified Mode
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.optionCard, styles.highContrastCard, selectedDisplayMode === 'contrasted' && styles.selectedOptionCard]}
+          onPress={() => setSelectedDisplayMode('contrasted')}
+        >
+          <Text style={styles.optionCardIconHighContrast}>Aa</Text>
+          <Text style={[styles.optionCardLabelHighContrast, selectedDisplayMode === 'contrasted' && styles.selectedOptionCardText]}>
+            High Contrast Mode
+          </Text>
+        </TouchableOpacity>
+      </View>
       
       {/* Contrôle Assisté */}
-      <Text style={styles.sectionTitle}>Contrôle Assisté</Text>
-      <TouchableOpacity
-        style={[styles.optionButton, selectedAssistiveControls.includes('voice') && styles.selectedOption]}
-        onPress={() => {
-          setSelectedAssistiveControls(prev => 
-            prev.includes('voice') 
-              ? prev.filter(c => c !== 'voice')
-              : [...prev, 'voice']
-          );
-        }}
-      >
-        <Text style={styles.optionText}>🎤 Voice Control (Commande vocale)</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.optionButton, selectedAssistiveControls.includes('eyes') && styles.selectedOption]}
-        onPress={() => {
-          setSelectedAssistiveControls(prev => 
-            prev.includes('eyes') 
-              ? prev.filter(c => c !== 'eyes')
-              : [...prev, 'eyes']
-          );
-        }}
-      >
-        <Text style={styles.optionText}>👁️ Eyes Control (Contrôle oculaire)</Text>
-      </TouchableOpacity>
+      <Text style={styles.sectionTitle}>Mode de navigation</Text>
+      <View style={styles.optionContainer}>
+        <TouchableOpacity
+          style={[styles.optionCard, styles.navCard, selectedAssistiveControls.includes('voice') && styles.selectedOptionCard]}
+          onPress={() => {
+            setSelectedAssistiveControls(prev => 
+              prev.includes('voice') 
+                ? prev.filter(c => c !== 'voice')
+                : [...prev, 'voice']
+            );
+          }}
+        >
+          <Text style={styles.navCardIcon}>🎤</Text>
+          <Text style={[styles.navCardLabel, selectedAssistiveControls.includes('voice') && styles.selectedOptionCardText]}>
+            Voice Control
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.optionCard, selectedAssistiveControls.includes('touch') && styles.selectedOptionCard]}
+          onPress={() => {
+            setSelectedAssistiveControls(prev => 
+              prev.includes('touch') 
+                ? prev.filter(c => c !== 'touch')
+                : [...prev, 'touch']
+            );
+          }}
+        >
+          <Text style={styles.optionCardIcon}>👆</Text>
+          <Text style={[styles.optionCardLabel, selectedAssistiveControls.includes('touch') && styles.selectedOptionCardText]}>
+            Touch
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.optionCard, selectedAssistiveControls.includes('switch') && styles.selectedOptionCard]}
+          onPress={() => {
+            setSelectedAssistiveControls(prev => 
+              prev.includes('switch') 
+                ? prev.filter(c => c !== 'switch')
+                : [...prev, 'switch']
+            );
+          }}
+        >
+          <Text style={styles.optionCardIcon}>🔄</Text>
+          <Text style={[styles.optionCardLabel, selectedAssistiveControls.includes('switch') && styles.selectedOptionCardText]}>
+            Switch Access
+          </Text>
+        </TouchableOpacity>
+      </View>
       
       <TouchableOpacity style={styles.button} onPress={() => setStep(2)}>
         <Text style={styles.buttonText}>Continuer</Text>
@@ -357,6 +396,81 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 15,
     textDecorationLine: 'underline',
+  },
+  /* New styles for option cards layout */
+  optionContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  optionCard: {
+    width: '31%',
+    height: 140,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 10,
+  },
+  selectedOptionCard: {
+    backgroundColor: '#00C2FF',
+    borderColor: '#00C2FF',
+  },
+  optionCardFlag: {
+    fontSize: 48,
+    marginBottom: 10,
+  },
+  optionCardIcon: {
+    fontSize: 32,
+    marginBottom: 10,
+  },
+  optionCardIconHighContrast: {
+    fontSize: 32,
+    marginBottom: 10,
+    color: '#fff',
+  },
+  optionCardText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+  },
+  selectedOptionCardText: {
+    color: '#fff',
+  },
+  optionCardLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#333',
+    textAlign: 'center',
+  },
+  optionCardLabelHighContrast: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#fff',
+    textAlign: 'center',
+  },
+  highContrastCard: {
+    backgroundColor: '#222',
+    borderColor: '#222',
+  },
+  navCard: {
+    backgroundColor: '#E0F7FF',
+    borderColor: '#00C2FF',
+  },
+  navCardIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  navCardLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#00C2FF',
+    textAlign: 'center',
   },
 });
 

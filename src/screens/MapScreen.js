@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  AccessiWay — Écran Carte (Map)
+//  VERA — Écran Carte (Map)
 // ─────────────────────────────────────────────
 
 import React, { useState } from 'react';

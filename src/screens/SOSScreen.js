@@ -33,7 +33,7 @@ const SOSScreen = ({
   onNavigate,
   onPressProfile,
   onNavigateTo,
-  sosRecents,
+  sosRecents = [],   // ← valeur par défaut si undefined
   onOpenRecent,
 }) => {
   const [sosState, setSosState]   = useState(SOS_STATE.IDLE);
@@ -227,7 +227,7 @@ const SOSScreen = ({
               <TouchableOpacity
                 key={item.id}
                 style={styles.recentItem}
-                onPress={() => onOpenRecent(item)}
+                onPress={() => onOpenRecent && onOpenRecent(item)}
                 activeOpacity={0.7}
               >
                 <View style={styles.recentLeft}>
@@ -245,7 +245,7 @@ const SOSScreen = ({
         {/* ── SOS Personnalisé ── */}
         <TouchableOpacity
           style={styles.customButton}
-          onPress={() => onNavigateTo('sos_step1')}
+          onPress={() => onNavigateTo && onNavigateTo('sos_step1')}
           activeOpacity={0.85}
         >
           <Text style={styles.customButtonText}>SOS Personnalisé</Text>

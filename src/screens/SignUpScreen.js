@@ -3,31 +3,33 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 
 import { Ionicons } from '@expo/vector-icons';
 
 const languages = [
-  { code: 'fr', name: 'French', flag: '🇫🇷' },
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Spanish', flag: '🇪🇸' },
-  { code: 'de', name: 'German', flag: '🇩🇪' },
-  { code: 'it', name: 'Italian', flag: '🇮🇹' },
-  { code: 'ar', name: 'Arabic', flag: '🇸🇦' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'en', name: 'Anglais', flag: '🇺🇸' },
+  { code: 'es', name: 'Espagnol', flag: '🇪🇸' },
+  { code: 'de', name: 'Allemand', flag: '🇩🇪' },
+  { code: 'it', name: 'Italien', flag: '🇮🇹' },
+  { code: 'ar', name: 'Arabe', flag: '🇸🇦' },
 ];
 
 const situations = [
-    { name: 'Wheelchair user', icon: 'body' },
-    { name: 'Visual impairment', icon: 'eye' },
-    { name: 'Hearing impairment', icon: 'ear' },
-    { name: 'Temporary injury', icon: 'medkit' },
-    { name: 'Cognitive disability', icon: 'brain' },
-    { name: 'Walking difficulty', icon: 'walk' },
-    { name: 'Blind', icon: 'eye-off' },
-    { name: 'Deaf', icon: 'ear-off' },
-    { name: 'Stroller/parent', icon: 'people' },
+    { name: 'Utilisateur en fauteuil roulant', icon: 'body' },
+    { name: 'Déficience visuelle', icon: 'eye' },
+    { name: 'Déficience auditive', icon: 'ear' },
+    { name: 'Blessure temporaire', icon: 'medkit' },
+    { name: 'Handicap cognitif', icon: 'brain' },
+    { name: 'Difficultés de marche', icon: 'walk' },
+    { name: 'Aveugle', icon: 'eye-off' },
+    { name: 'Sourd', icon: 'ear-off' },
+    { name: 'Poussette/Parent', icon: 'people' },
 ];
 
 
 const SignUpScreen = ({ navigation }) => {
   const [step, setStep] = useState(1);
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [selectedLanguage, setSelectedLanguage] = useState('fr');
   const [selectedSituations, setSelectedSituations] = useState([]);
+  const [selectedDisplayMode, setSelectedDisplayMode] = useState('standard');
+  const [selectedAssistiveControls, setSelectedAssistiveControls] = useState([]);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -51,15 +53,106 @@ const SignUpScreen = ({ navigation }) => {
   const renderStep1 = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.title}>Langue & Préférences</Text>
-      {languages.map(lang => (
+      
+      {/* Sélection de la langue */}
+      <Text style={styles.sectionTitle}>Langue</Text>
+      <View style={styles.optionContainer}>
+        {languages.map(lang => (
+          <TouchableOpacity
+            key={lang.code}
+            style={[styles.optionCard, selectedLanguage === lang.code && styles.selectedOptionCard]}
+            onPress={() => setSelectedLanguage(lang.code)}
+          >
+            <Text style={styles.optionCardFlag}>{lang.flag}</Text>
+            <Text style={[styles.optionCardText, selectedLanguage === lang.code && styles.selectedOptionCardText]}>
+              {lang.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      
+      {/* Modes d'affichage */}
+      <Text style={styles.sectionTitle}>Mode d'affichage</Text>
+      <View style={styles.optionContainer}>
         <TouchableOpacity
-          key={lang.code}
-          style={[styles.optionButton, selectedLanguage === lang.code && styles.selectedOption]}
-          onPress={() => setSelectedLanguage(lang.code)}
+          style={[styles.optionCard, selectedDisplayMode === 'standard' && styles.selectedOptionCard]}
+          onPress={() => setSelectedDisplayMode('standard')}
         >
-          <Text style={styles.optionText}>{lang.flag} {lang.name}</Text>
+          <Text style={styles.optionCardIcon}>Aa</Text>
+          <Text style={[styles.optionCardLabel, selectedDisplayMode === 'standard' && styles.selectedOptionCardText]}>
+            Mode Standard
+          </Text>
         </TouchableOpacity>
-      ))}
+        <TouchableOpacity
+          style={[styles.optionCard, selectedDisplayMode === 'simplified' && styles.selectedOptionCard]}
+          onPress={() => setSelectedDisplayMode('simplified')}
+        >
+          <Text style={styles.optionCardIcon}>Aa</Text>
+          <Text style={[styles.optionCardLabel, selectedDisplayMode === 'simplified' && styles.selectedOptionCardText]}>
+            Mode Simplifié
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.optionCard, styles.highContrastCard, selectedDisplayMode === 'contrasted' && styles.selectedOptionCard]}
+          onPress={() => setSelectedDisplayMode('contrasted')}
+        >
+          <Text style={styles.optionCardIconHighContrast}>Aa</Text>
+          <Text style={[styles.optionCardLabelHighContrast, selectedDisplayMode === 'contrasted' && styles.selectedOptionCardText]}>
+            Mode Haut Contraste
+          </Text>
+        </TouchableOpacity>
+      </View>
+      
+      {/* Contrôle Assisté */}
+      <Text style={styles.sectionTitle}>Mode de navigation</Text>
+      <View style={styles.optionContainer}>
+        <TouchableOpacity
+          style={[styles.optionCard, styles.navCard, selectedAssistiveControls.includes('voice') && styles.selectedOptionCard]}
+          onPress={() => {
+            setSelectedAssistiveControls(prev => 
+              prev.includes('voice') 
+                ? prev.filter(c => c !== 'voice')
+                : [...prev, 'voice']
+            );
+          }}
+        >
+          <Text style={styles.navCardIcon}>🎤</Text>
+          <Text style={[styles.navCardLabel, selectedAssistiveControls.includes('voice') && styles.selectedOptionCardText]}>
+            Contrôle Vocal
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.optionCard, selectedAssistiveControls.includes('touch') && styles.selectedOptionCard]}
+          onPress={() => {
+            setSelectedAssistiveControls(prev => 
+              prev.includes('touch') 
+                ? prev.filter(c => c !== 'touch')
+                : [...prev, 'touch']
+            );
+          }}
+        >
+          <Text style={styles.optionCardIcon}>👆</Text>
+          <Text style={[styles.optionCardLabel, selectedAssistiveControls.includes('touch') && styles.selectedOptionCardText]}>
+            Tactile
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.optionCard, selectedAssistiveControls.includes('switch') && styles.selectedOptionCard]}
+          onPress={() => {
+            setSelectedAssistiveControls(prev => 
+              prev.includes('switch') 
+                ? prev.filter(c => c !== 'switch')
+                : [...prev, 'switch']
+            );
+          }}
+        >
+          <Text style={styles.optionCardIcon}>🔄</Text>
+          <Text style={[styles.optionCardLabel, selectedAssistiveControls.includes('switch') && styles.selectedOptionCardText]}>
+            Accès Commuté
+          </Text>
+        </TouchableOpacity>
+      </View>
+      
       <TouchableOpacity style={styles.button} onPress={() => setStep(2)}>
         <Text style={styles.buttonText}>Continuer</Text>
       </TouchableOpacity>
@@ -198,6 +291,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flex: 1,
   },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#333',
+    marginTop: 20,
+    marginBottom: 10,
+  },
   subtitle: {
     fontSize: 16,
     color: '#666',
@@ -296,6 +396,81 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 15,
     textDecorationLine: 'underline',
+  },
+  /* New styles for option cards layout */
+  optionContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  optionCard: {
+    width: '31%',
+    height: 140,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 10,
+  },
+  selectedOptionCard: {
+    backgroundColor: '#00C2FF',
+    borderColor: '#00C2FF',
+  },
+  optionCardFlag: {
+    fontSize: 48,
+    marginBottom: 10,
+  },
+  optionCardIcon: {
+    fontSize: 32,
+    marginBottom: 10,
+  },
+  optionCardIconHighContrast: {
+    fontSize: 32,
+    marginBottom: 10,
+    color: '#fff',
+  },
+  optionCardText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+  },
+  selectedOptionCardText: {
+    color: '#fff',
+  },
+  optionCardLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#333',
+    textAlign: 'center',
+  },
+  optionCardLabelHighContrast: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#fff',
+    textAlign: 'center',
+  },
+  highContrastCard: {
+    backgroundColor: '#222',
+    borderColor: '#222',
+  },
+  navCard: {
+    backgroundColor: '#E0F7FF',
+    borderColor: '#00C2FF',
+  },
+  navCardIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  navCardLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#00C2FF',
+    textAlign: 'center',
   },
 });
 

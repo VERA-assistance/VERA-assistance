@@ -1,29 +1,29 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const WelcomeScreen = ({ navigation }) => {
   return (
-    <ImageBackground source={require('../../assets/background.png')} style={styles.background}>
+    <View style={styles.background}>
         <View style={styles.overlay}>
             {/* <Image source={require('../../assets/logo.png')} style={styles.logo} /> */}
             <View style={styles.logoContainer}>
               <Image source={require('../../assets/logo.png')} style={styles.logo} />
             </View>
-            <Text style={styles.subtitle}>Real access. Real people. Right now.</Text>
+            <Text style={styles.subtitle}>Accès réel. Personnes réelles. Maintenant.</Text>
             
             <View style={styles.iconContainer}>
                 {/* Les icônes peuvent être ajoutées ici si nécessaire */}
             </View>
 
             <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignUp')}>
-                <Text style={styles.buttonText}>Get Started</Text>
+                <Text style={styles.buttonText}>Commencer</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.linkText}>I already have an account</Text>
+                <Text style={styles.linkText}>J'ai déjà un compte</Text>
             </TouchableOpacity>
         </View>
-    </ImageBackground>
+    </View>
   );
 };
 

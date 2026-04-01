@@ -3,30 +3,30 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 
 import { Ionicons } from '@expo/vector-icons';
 
 const languages = [
-  { code: 'fr', name: 'French', flag: '🇫🇷' },
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Spanish', flag: '🇪🇸' },
-  { code: 'de', name: 'German', flag: '🇩🇪' },
-  { code: 'it', name: 'Italian', flag: '🇮🇹' },
-  { code: 'ar', name: 'Arabic', flag: '🇸🇦' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'en', name: 'Anglais', flag: '🇺🇸' },
+  { code: 'es', name: 'Espagnol', flag: '🇪🇸' },
+  { code: 'de', name: 'Allemand', flag: '🇩🇪' },
+  { code: 'it', name: 'Italien', flag: '🇮🇹' },
+  { code: 'ar', name: 'Arabe', flag: '🇸🇦' },
 ];
 
 const situations = [
-    { name: 'Wheelchair user', icon: 'body' },
-    { name: 'Visual impairment', icon: 'eye' },
-    { name: 'Hearing impairment', icon: 'ear' },
-    { name: 'Temporary injury', icon: 'medkit' },
-    { name: 'Cognitive disability', icon: 'brain' },
-    { name: 'Walking difficulty', icon: 'walk' },
-    { name: 'Blind', icon: 'eye-off' },
-    { name: 'Deaf', icon: 'ear-off' },
-    { name: 'Stroller/parent', icon: 'people' },
+    { name: 'Utilisateur en fauteuil roulant', icon: 'body' },
+    { name: 'Déficience visuelle', icon: 'eye' },
+    { name: 'Déficience auditive', icon: 'ear' },
+    { name: 'Blessure temporaire', icon: 'medkit' },
+    { name: 'Handicap cognitif', icon: 'brain' },
+    { name: 'Difficultés de marche', icon: 'walk' },
+    { name: 'Aveugle', icon: 'eye-off' },
+    { name: 'Sourd', icon: 'ear-off' },
+    { name: 'Poussette/Parent', icon: 'people' },
 ];
 
 
 const SignUpScreen = ({ navigation }) => {
   const [step, setStep] = useState(1);
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [selectedLanguage, setSelectedLanguage] = useState('fr');
   const [selectedSituations, setSelectedSituations] = useState([]);
   const [selectedDisplayMode, setSelectedDisplayMode] = useState('standard');
   const [selectedAssistiveControls, setSelectedAssistiveControls] = useState([]);
@@ -80,7 +80,7 @@ const SignUpScreen = ({ navigation }) => {
         >
           <Text style={styles.optionCardIcon}>Aa</Text>
           <Text style={[styles.optionCardLabel, selectedDisplayMode === 'standard' && styles.selectedOptionCardText]}>
-            Standard Mode
+            Mode Standard
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -89,7 +89,7 @@ const SignUpScreen = ({ navigation }) => {
         >
           <Text style={styles.optionCardIcon}>Aa</Text>
           <Text style={[styles.optionCardLabel, selectedDisplayMode === 'simplified' && styles.selectedOptionCardText]}>
-            Simplified Mode
+            Mode Simplifié
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -98,7 +98,7 @@ const SignUpScreen = ({ navigation }) => {
         >
           <Text style={styles.optionCardIconHighContrast}>Aa</Text>
           <Text style={[styles.optionCardLabelHighContrast, selectedDisplayMode === 'contrasted' && styles.selectedOptionCardText]}>
-            High Contrast Mode
+            Mode Haut Contraste
           </Text>
         </TouchableOpacity>
       </View>
@@ -118,7 +118,7 @@ const SignUpScreen = ({ navigation }) => {
         >
           <Text style={styles.navCardIcon}>🎤</Text>
           <Text style={[styles.navCardLabel, selectedAssistiveControls.includes('voice') && styles.selectedOptionCardText]}>
-            Voice Control
+            Contrôle Vocal
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -133,7 +133,7 @@ const SignUpScreen = ({ navigation }) => {
         >
           <Text style={styles.optionCardIcon}>👆</Text>
           <Text style={[styles.optionCardLabel, selectedAssistiveControls.includes('touch') && styles.selectedOptionCardText]}>
-            Touch
+            Tactile
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -148,7 +148,7 @@ const SignUpScreen = ({ navigation }) => {
         >
           <Text style={styles.optionCardIcon}>🔄</Text>
           <Text style={[styles.optionCardLabel, selectedAssistiveControls.includes('switch') && styles.selectedOptionCardText]}>
-            Switch Access
+            Accès Commuté
           </Text>
         </TouchableOpacity>
       </View>
